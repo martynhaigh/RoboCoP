@@ -19,7 +19,7 @@ import android.net.Uri;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ${providerName}Provider extends ContentProvider {
+public abstract class ${providerName}ProviderBase extends ContentProvider {
 
     public static final String AUTHORITY = "${packageName}.provider";
 
@@ -37,7 +37,7 @@ public class ${providerName}Provider extends ContentProvider {
 #end
 
     private static final UriMatcher URI_MATCHER;
-    private ${providerName}Database mDatabase;
+    protected ${providerName}Database mDatabase;
 
 #set( $matcherIndex = 0 )
 #foreach( $table in $tables )
@@ -49,7 +49,7 @@ public class ${providerName}Provider extends ContentProvider {
 #set($matcherIndex = $matcherIndex+1)
 #end
 #foreach( $relationship in $relationships )
-    #set( $joinTableName = $relationship.getLeftTableConstantName() + "_JOIN_" + $relationship.getRightTableConstantName())
+#set( $joinTableName = $relationship.getLeftTableConstantName() + "_JOIN_" + $relationship.getRightTableConstantName())
     private static final int ${joinTableName}_DIR = ${matcherIndex};
 
     #set($matcherIndex = $matcherIndex+1)
@@ -91,13 +91,13 @@ public class ${providerName}Provider extends ContentProvider {
 #end
 
     @Override
-    public final boolean onCreate() {
+    public boolean onCreate() {
         mDatabase = new ${providerName}Database(getContext());
         return true;
     }
 
     @Override
-    public final String getType(final Uri uri) {
+    public String getType(final Uri uri) {
         switch (URI_MATCHER.match(uri)) {
 #foreach( $table in $tables )
 #set( $tableNameCaps = $table.getTableConstantName() )
@@ -120,7 +120,7 @@ public class ${providerName}Provider extends ContentProvider {
     }
 
     @Override
-    public final Cursor query(final Uri uri, String[] projection, final String selection, final String[] selectionArgs, final String sortOrder) {
+    public Cursor query(final Uri uri, String[] projection, final String selection, final String[] selectionArgs, final String sortOrder) {
         final SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
         final SQLiteDatabase dbConnection = mDatabase.getReadableDatabase();
 
@@ -172,7 +172,7 @@ public class ${providerName}Provider extends ContentProvider {
     }
 
     @Override
-    public final Uri insert(final Uri uri, final ContentValues values) {
+    public Uri insert(final Uri uri, final ContentValues values) {
         final SQLiteDatabase dbConnection = mDatabase.getWritableDatabase();
 
         try {
@@ -211,7 +211,7 @@ public class ${providerName}Provider extends ContentProvider {
     }
 
     @Override
-    public final int update(final Uri uri, final ContentValues values, final String selection, final String[] selectionArgs) {
+    public int update(final Uri uri, final ContentValues values, final String selection, final String[] selectionArgs) {
         final SQLiteDatabase dbConnection = mDatabase.getWritableDatabase();
         int updateCount = 0;
         List<Uri> joinUris = new ArrayList<Uri>();
@@ -272,7 +272,7 @@ public class ${providerName}Provider extends ContentProvider {
     }
 
     @Override
-    public final int delete(final Uri uri, final String selection, final String[] selectionArgs) {
+    public int delete(final Uri uri, final String selection, final String[] selectionArgs) {
         final SQLiteDatabase dbConnection = mDatabase.getWritableDatabase();
         int deleteCount = 0;
         List<Uri> joinUris = new ArrayList<Uri>();

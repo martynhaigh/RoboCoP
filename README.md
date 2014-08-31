@@ -94,7 +94,8 @@ buildscript {
     classpath 'com.android.tools.build:gradle:0.9.+'
 
     //this is the important part, the buildscript needs our library to generate the code.
-    classpath files('RoboCoP/RoboCoP-0.5-jar-with-dependencies.jar')
+    classpath files('RoboCoP/RoboCoP.jar')
+    //classpath files('RoboCoP/RoboCoP-0.5-jar-with-dependencies.jar')
   }
 }
 ```

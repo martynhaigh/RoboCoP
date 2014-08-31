@@ -27,22 +27,22 @@ public class ContentProviderTableModel {
         return mFields;
     }
 
-    public void addField(String fieldName, String type) {
-        mFields.add(new ContentProviderTableFieldModel(type, fieldName));
+    public void addField(String fieldName, String type, String defaultField) {
+        mFields.add(new ContentProviderTableFieldModel(type, fieldName, defaultField));
     }
 
     public String getTableName() {
         return mTableName;
     }
 
+
+
     public String getTableClassName() {
         return StringUtils.convertToTitleCase(mTableName);
     }
-
     public String getTableConstantName() {
         return StringUtils.getConstantString(mTableName);
     }
-
 
     public static class ContentProviderTableFieldModel {
 
@@ -58,10 +58,17 @@ public class ContentProviderTableModel {
         @SerializedName("name")
         private String mFieldName;
 
-        public ContentProviderTableFieldModel(String fieldType, String fieldName) {
+
+        @SerializedName("default")
+        private String mFieldDefault;
+
+        public ContentProviderTableFieldModel(String fieldType, String fieldName, String fieldDefault) {
             mFieldType = fieldType;
             mFieldName = fieldName;
+            mFieldDefault = fieldDefault;
         }
+
+        public boolean isCustom() { return "CUSTOM".equals(getTypeString()); }
 
         public String getFieldType() {
             return mFieldType;
@@ -69,6 +76,9 @@ public class ContentProviderTableModel {
 
         public String getFieldName() {
             return mFieldName;
+        }
+        public String getFieldDefault() {
+            return mFieldDefault;
         }
 
         public String getConstantString() {
@@ -80,8 +90,10 @@ public class ContentProviderTableModel {
                 return "INTEGER";
             } else if (mFieldType.equals(LONG) || mFieldName.equals(DOUBLE)) {
                 return "NUMERIC";
-            } else {
+            } else if (mFieldType.equals(STRING)) {
                 return "TEXT";
+            } else {
+                return "CUSTOM";
             }
         }
 
@@ -89,11 +101,26 @@ public class ContentProviderTableModel {
             String typeLower = mFieldType.toLowerCase();
             if (typeLower.equals(BOOLEAN)) {
                 return "boolean";
-            }
-            if (typeLower.equals(INT)) {
+            } else if (typeLower.equals(INT)) {
                 return "int";
             } else if (typeLower.equals(LONG) || typeLower.equals(DOUBLE)) {
                 return "double";
+            } else if (typeLower.equals(STRING)) {
+                return "String";
+            } else {
+                return mFieldType;
+            }
+        }
+        public String getJavaTypeLongString() {
+            String typeLower = mFieldType.toLowerCase();
+            if (typeLower.equals(BOOLEAN)) {
+                return "Boolean";
+            } else if (typeLower.equals(INT)) {
+                return "Integer";
+            } else if (typeLower.equals(DOUBLE)) {
+                return "Double";
+            } else if (typeLower.equals(LONG)) {
+                return "Long";
             } else {
                 return "String";
             }

@@ -58,7 +58,7 @@ public class ContentProviderWriter {
             providerContext.put("providerName", contentProviderModel.getProviderName());
             providerContext.put("tables", contentProviderModel.getTables());
             providerContext.put("relationships", contentProviderModel.getRelationships());
-            writeFile(engine, providerContext, "ContentProvider.vm", providerPath, "/" + contentProviderModel.getProviderName() + "Provider.java");
+            writeFile(engine, providerContext, "ContentProvider.vm", providerPath, "/" + contentProviderModel.getProviderName() + "ProviderBase.java");
             writeFile(engine, providerContext, "ProviderXML.vm", providerXMLPath, "/content-provider.xml");
 
             VelocityContext databaseContext = new VelocityContext(providerContext);
@@ -67,10 +67,14 @@ public class ContentProviderWriter {
 
             for (ContentProviderTableModel table : contentProviderModel.getTables()) {
                 VelocityContext tableContext = new VelocityContext(baseContext);
+                tableContext.put("providerName", contentProviderModel.getProviderName());
+                tableContext.put("tableConstantName", table.getTableConstantName());
                 tableContext.put("table", table);
                 tableContext.put("participatingRelationships", contentProviderModel.getRelationshipsForTable(table));
+                tableContext.put("participatingExternalRelationships", contentProviderModel.getExternalRelationshipsForTable(table));
                 tableContext.put("tableName", table.getTableClassName());
                 tableContext.put("fields", table.getFields());
+                tableContext.put("serialVersionUID", table.getTableClassName().hashCode());
                 writeFile(engine, tableContext, "Table.vm", tablePath, "/" + table.getTableClassName() + "Table.java");
                 writeFile(engine, tableContext, "Model.vm", modelPath, "/" + table.getTableClassName() + ".java");
             }
@@ -111,7 +115,7 @@ public class ContentProviderWriter {
                         removeFilesAndFoldersBelow(files[i]);
                     }
                     else {
-                        files[i].delete();
+                        //files[i].delete();
                     }
                 }
             }
@@ -129,7 +133,36 @@ public class ContentProviderWriter {
         }
         Template providerTemplate = engine.getTemplate(templateName);
 
+        FileReader r = null;
+        try {
+            r = new FileReader(outputFilePath + outputFileName);
+        } catch (FileNotFoundException e) {
+            //e.printStackTrace();
+        }
+        StringBuffer sb = new StringBuffer();
+        if(r != null) {
+            BufferedReader br = new BufferedReader(r);
+            String s;
+            boolean keep = false;
+            try {
+                while ((s = br.readLine()) != null) {
+                    if (s.trim().startsWith("// ENDKEEP")) {
+                        keep = false;
+                    }
+                    if (keep) {
+                        sb.append(s);
+                    }
+                    if (s.trim().startsWith("// KEEP")) {
+                        keep = true;
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        context.put("keep", sb.toString());
         FileWriter w = null;
+
         try {
             w = new FileWriter(outputFilePath + outputFileName);
             providerTemplate.merge(context, w);

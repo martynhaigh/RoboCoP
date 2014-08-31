@@ -47,7 +47,7 @@ public class ${providerName}Database extends SQLiteOpenHelper {
         dropTablesAndCreate(db);
     }
 
-    // KEEP
-    ${keep}
-    // ENDKEEP
+// KEEP
+${keep}
+// ENDKEEP
 }

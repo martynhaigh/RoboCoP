@@ -29,7 +29,7 @@ public class ${tableName} implements Serializable {
 #foreach( $field in $fields )
 #if($field)
 
-    @SerializedName("$field.getFieldName()")
+    @SerializedName("$field.getFieldSerialized()")
     private ${field.getJavaTypeString()} ${field.getPrivateVariableName()};
 #end
 #end
@@ -242,6 +242,16 @@ public class ${tableName} implements Serializable {
 #end
 #end
 #end
+
+
+    public static ContentValues[] getContentValues(List<${tableName}> items) {
+        ContentValues[] values = new ContentValues[items.size()];
+        int i = 0;
+        for(${tableName} item : items) {
+            values[i++] = item.getContentValues();
+        }
+        return values;
+    }
 
 // KEEP
 ${keep}

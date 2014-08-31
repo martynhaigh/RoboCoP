@@ -144,14 +144,22 @@ public class ContentProviderWriter {
             BufferedReader br = new BufferedReader(r);
             String s;
             boolean keep = false;
+            String last = "";
+            int lastLength = 0;
             try {
                 while ((s = br.readLine()) != null) {
                     if (s.trim().startsWith("// ENDKEEP")) {
                         keep = false;
                     }
+
                     if (keep) {
-                        sb.append(s);
-                        sb.append("\n");
+
+                        if (!(s.length() == 0 && lastLength == 0)) {
+                            System.out.println("Printing keep line (" + s.length() + "): `" + s + "`");
+                            sb.append(s);
+                            sb.append("\n");
+                        }
+                        lastLength = s.length();
                     }
                     if (s.trim().startsWith("// KEEP")) {
                         keep = true;

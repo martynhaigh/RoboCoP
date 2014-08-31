@@ -16,6 +16,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -170,6 +171,53 @@ public abstract class ${providerName}ProviderBase extends ContentProvider {
         return cursor;
 
     }
+
+
+    @Override
+    public int bulkInsert(Uri uri, ContentValues[] values){
+        int numInserted = 0;
+        String table = null;
+
+        int uriType = URI_MATCHER.match(uri);
+
+        switch (uriType) {
+#foreach( $table in $tables )
+#set( $tableNameCaps = $table.getTableConstantName() )
+#set( $tableNameLower = $tableNameCaps.toLowerCase() )
+            case ${tableNameCaps}_DIR:
+            case ${tableNameCaps}_ID:
+                table = ${table.getTableClassName()}Table.TABLE_NAME;
+                break;
+
+#end
+
+            default :
+                throw new IllegalArgumentException("Unsupported URI:" + uri);
+        }
+        if (!TextUtils.isEmpty(table)) {
+            final SQLiteDatabase dbConnection = mDatabase.getWritableDatabase();
+            dbConnection.beginTransaction();
+            try {
+                for (ContentValues cv : values) {
+                    long newID = dbConnection.insertOrThrow(table, null, cv);
+                    if (newID <= 0) {
+                        throw new SQLException("Failed to insert row into " + uri);
+                    }
+                }
+                dbConnection.setTransactionSuccessful();
+                getContext().getContentResolver().notifyChange(uri, null);
+                numInserted = values.length;
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                dbConnection.endTransaction();
+            }
+        }
+        return numInserted;
+    }
+
+
+
 
     @Override
     public Uri insert(final Uri uri, final ContentValues values) {
@@ -329,7 +377,7 @@ public abstract class ${providerName}ProviderBase extends ContentProvider {
         return deleteCount;
     }
 
-    // KEEP
-    ${keep}
-    // ENDKEEP
+// KEEP
+${keep}
+// ENDKEEP
 }

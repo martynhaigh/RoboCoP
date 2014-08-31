@@ -43,6 +43,13 @@ public interface ${tableName}Table {
 
 #end
 #end
+
+#foreach( $field in $fields )
+#if ($field && $field.getUniqueConstraint().length() > 0)
+#set ($tableCreate = $tableCreate + ", UNIQUE (" + $field.getConstantString().toLowerCase() + ") ON CONFLICT " + $field.getUniqueConstraint())
+#end
+#end
+
     String[] ALL_COLUMNS = new String[] {${allColumns}};
 
     String SQL_CREATE = "CREATE TABLE ${tableNameLower} ( ${tableCreate} )";

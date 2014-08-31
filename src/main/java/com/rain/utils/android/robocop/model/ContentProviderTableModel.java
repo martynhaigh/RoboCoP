@@ -4,6 +4,8 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * Created with IntelliJ IDEA.
@@ -27,8 +29,8 @@ public class ContentProviderTableModel {
         return mFields;
     }
 
-    public void addField(String fieldName, String type, String defaultField) {
-        mFields.add(new ContentProviderTableFieldModel(type, fieldName, defaultField));
+    public void addField(String fieldName, String type, String fieldUnique, String fieldSerialized, String fieldDefault) {
+        mFields.add(new ContentProviderTableFieldModel(type, fieldName, fieldUnique, fieldSerialized, fieldDefault));
     }
 
     public String getTableName() {
@@ -58,22 +60,26 @@ public class ContentProviderTableModel {
         @SerializedName("name")
         private String mFieldName;
 
+        @SerializedName("unique")
+        private String mFieldUnique = "";
+
+        @SerializedName("serialized")
+        private String mFieldSerialized = "";
 
         @SerializedName("default")
-        private String mFieldDefault;
+        private String mFieldDefault = "";
 
-        public ContentProviderTableFieldModel(String fieldType, String fieldName, String fieldDefault) {
+        public ContentProviderTableFieldModel(String fieldType, String fieldName, String fieldUnique, String fieldSerialized, String fieldDefault) {
             mFieldType = fieldType;
             mFieldName = fieldName;
+            mFieldUnique = fieldUnique;
+            mFieldSerialized = fieldSerialized;
             mFieldDefault = fieldDefault;
         }
-
-        public boolean isCustom() { return "CUSTOM".equals(getTypeString()); }
 
         public String getFieldType() {
             return mFieldType;
         }
-
         public String getFieldName() {
             return mFieldName;
         }
@@ -136,6 +142,32 @@ public class ContentProviderTableModel {
             } else {
                 return "getString";
             }
+        }
+
+        public String getUniqueConstraint() {
+            Set<String> validConstraints = new HashSet<String>();
+            validConstraints.add("ABORT");
+            validConstraints.add("FAIL");
+            validConstraints.add("IGNORE");
+            validConstraints.add("NONE");
+            validConstraints.add("REPLACE");
+            validConstraints.add("ROLLBACK");
+
+            if(validConstraints.contains(mFieldUnique)) {
+                return mFieldUnique;
+            }
+            return "";
+        }
+
+        public String getFieldSerialized() {
+            if(mFieldSerialized != "" && mFieldSerialized != null) {
+                return mFieldSerialized;
+            }
+            return mFieldName;
+        }
+
+        public boolean isCustom() {
+            return "CUSTOM".equals(getTypeString());
         }
 
         public String getPrivateVariableName() {

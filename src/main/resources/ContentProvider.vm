@@ -328,4 +328,8 @@ public abstract class ${providerName}ProviderBase extends ContentProvider {
 
         return deleteCount;
     }
+
+    // KEEP
+    ${keep}
+    // ENDKEEP
 }

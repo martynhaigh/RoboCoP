@@ -46,4 +46,8 @@ public class ${providerName}Database extends SQLiteOpenHelper {
     private void upgrade(final SQLiteDatabase db, final int oldVersion, final int newVersion) {
         dropTablesAndCreate(db);
     }
+
+    // KEEP
+    ${keep}
+    // ENDKEEP
 }

@@ -61,4 +61,8 @@ public interface ${tableName}Table {
 #end
 #end
 #end
+
+// KEEP
+${keep}
+// ENDKEEP
 }

@@ -151,6 +151,7 @@ public class ContentProviderWriter {
                     }
                     if (keep) {
                         sb.append(s);
+                        sb.append("\n");
                     }
                     if (s.trim().startsWith("// KEEP")) {
                         keep = true;

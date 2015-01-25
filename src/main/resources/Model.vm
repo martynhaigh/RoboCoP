@@ -114,8 +114,10 @@ public class ${tableName} implements Serializable {
         String prefix = prependTableName ? ${tableName}Table.TABLE_NAME + "_" : "";
         setRowId(cursor.getLong(cursor.getColumnIndex(prefix + ${tableName}Table._ID)));
 #foreach ($field in $fields)
-#if($field && !$field.isCustom())
+#if($field && !$field.isCustom() && $field.getFieldType() != "boolean")
         set${field.getNameAsTitleCase()}(cursor.${field.getJavaTypeStringGetter()}(cursor.getColumnIndex(prefix + ${tableName}Table.${field.getConstantString()})));
+#elseif($field && $field.getFieldType() == "boolean")
+        set${field.getNameAsTitleCase()}(cursor.${field.getJavaTypeStringGetter()}(cursor.getColumnIndex(prefix + ${tableName}Table.${field.getConstantString()})) > 0);
 #end
 #end
 

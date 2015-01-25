@@ -22,7 +22,9 @@ public class ContentProviderWriter {
         Gson gson = new Gson();
         try {
             ContentProviderModel model = gson.fromJson(readFile(schemaPath), ContentProviderModel.class);
+            model.initModels();
             model.inflateRelationships();
+            model.printContents();
             createContentProvider(model, sourcePath);
         } catch (IOException e) {
             e.printStackTrace();
@@ -67,6 +69,7 @@ public class ContentProviderWriter {
 
             for (ContentProviderTableModel table : contentProviderModel.getTables()) {
                 VelocityContext tableContext = new VelocityContext(baseContext);
+                tableContext.put("providerModel", contentProviderModel);
                 tableContext.put("providerName", contentProviderModel.getProviderName());
                 tableContext.put("tableConstantName", table.getTableConstantName());
                 tableContext.put("table", table);

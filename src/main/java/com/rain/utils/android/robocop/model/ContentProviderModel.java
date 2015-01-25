@@ -2,18 +2,9 @@ package com.rain.utils.android.robocop.model;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.io.Console;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.rain.utils.android.robocop.model.ContentProviderTableModel.ContentProviderTableFieldModel;
-
-/**
- - * Created with IntelliJ IDEA.
- - * User: dustin
- - * Date: 1/15/14
- - * Time: 9:46 AM
- - */
 public class ContentProviderModel {
 
     @SerializedName("packageName")
@@ -24,6 +15,9 @@ public class ContentProviderModel {
 
     @SerializedName("databaseVersion")
     private int mDatabaseVersion;
+
+    @SerializedName("timeDateFormat")
+    private String mTimeDateFormat;
 
     @SerializedName("tables")
     private List<ContentProviderTableModel> mTables;
@@ -45,7 +39,7 @@ public class ContentProviderModel {
             System.out.println();
             System.out.println("Fields for " + table.getTableName() + ":");
             for(ContentProviderTableFieldModel field : table.getFields()) {
-                System.out.println("- " + field.getFieldName());
+                System.out.println("- " + field.getFieldName() + " (" + field.getFieldType() + ")");
             }
         }
     }
@@ -65,6 +59,10 @@ public class ContentProviderModel {
 
     public int getDatabaseVersion() {
         return mDatabaseVersion;
+    }
+
+    public String getDateTimeFormat() {
+        return mTimeDateFormat;
     }
 
     public List<ContentProviderRelationshipModel> getRelationships() {
@@ -102,6 +100,19 @@ public class ContentProviderModel {
         return includedRelationships;
     }
 
+    public void initModels() {
+        for (ContentProviderTableModel table : mTables) {
+            for (ContentProviderTableFieldModel model : table.getFields()) {
+                if (model.isDateTime()) {
+                    table.setUsesDateTime(true);
+                    System.out.println(table.getTableName() + " uses datetime");
+                    break;
+                }
+            }
+        }
+
+    }
+
     public void inflateRelationships() {
         if (mRelationships != null) {
             for (ContentProviderRelationshipModel relationship : mRelationships) {
@@ -134,6 +145,5 @@ public class ContentProviderModel {
                 relationship.setRightTableModel(rightTable);
             }
         }
-        printContents();
     }
 }

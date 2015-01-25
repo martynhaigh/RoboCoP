@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import com.google.gson.annotations.SerializedName;
 
+
 import ${packageName}.database.table.${tableName}Table;
 #if( $participatingExternalRelationships )
 #foreach( $relationship in $participatingExternalRelationships )
@@ -16,12 +17,23 @@ import ${packageName}.database.table.${foreignClassName}Table;
 #end
 import ${packageName}.provider.${providerName}Provider;
 
+#if( $table.isUsesDateTime() )
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import android.util.Log;
+import java.util.Date;
+#end
 import java.util.ArrayList;
 import java.util.List;
 import java.io.Serializable;
 
 public class ${tableName} implements Serializable {
 
+    public final String LOGTAG = "${tableName}";
+#if( $table.isUsesDateTime() )
+
+    private final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("${providerModel.getDateTimeFormat()}");
+#end
 
     private static final long serialVersionUID = ${serialVersionUID}L;
 
@@ -53,12 +65,25 @@ public class ${tableName} implements Serializable {
     }
 
     public ${tableName}(final ContentValues values) {
-            mRowId = values.getAsLong(${tableName}Table._ID);
+         mRowId = values.getAsLong(${tableName}Table._ID);
 #foreach ($field in $fields)
 #if($field && !$field.isCustom())
-            ${field.getPrivateVariableName()} = values.getAs${field.getJavaTypeLongString()}(${tableName}Table.${field.getConstantString()});
+         ${field.getPrivateVariableName()} = values.getAs${field.getJavaTypeLongString()}(${tableName}Table.${field.getConstantString()});
 #end
 #end
+
+## #if( $table.isUsesDateTime() )
+##         try {
+## #foreach ($field in $fields)
+## #if($field && $field.isDateTime())
+##             ${field.getPrivateVariableName()} = dateTimeFormat.parse(values.getAsString(${tableName}Table.${field.getConstantString()}));
+## #end
+## #end
+##         } catch (ParseException e) {
+##             Log.e(LOGTAG, "Parsing ISO8601 datetime failed", e);
+##         }
+## #end
+
     }
 
     // Sometimes you're going to need to extend your generated model

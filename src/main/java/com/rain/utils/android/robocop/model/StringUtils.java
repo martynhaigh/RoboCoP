@@ -1,11 +1,5 @@
 package com.rain.utils.android.robocop.model;
 
-/**
- * Created with IntelliJ IDEA.
- * User: dustin
- * Date: 1/16/14
- * Time: 5:07 PM
- */
 public class StringUtils {
 
     public static String getPrivateVariableName(String input) {

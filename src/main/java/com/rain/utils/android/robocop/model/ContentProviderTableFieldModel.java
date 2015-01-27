@@ -7,12 +7,7 @@ import java.util.Set;
 
 public class ContentProviderTableFieldModel {
 
-    public static final String STRING = "string";
-    public static final String DOUBLE = "double";
-    public static final String INT = "int";
-    public static final String BOOLEAN = "boolean";
-    public static final String LONG = "long";
-    public static final String DATE_TIME = "datetime";
+
 
     @SerializedName("type")
     private String mFieldType;
@@ -54,53 +49,23 @@ public class ContentProviderTableFieldModel {
     }
 
     public String getTypeString() {
-        if (mFieldType.equals(INT) || mFieldType.equals(BOOLEAN)) {
-            return "INTEGER";
-        } else if (mFieldType.equals(LONG) || mFieldName.equals(DOUBLE) || mFieldName.equals(DATE_TIME)) {
-            return "NUMERIC";
-        } else if (mFieldType.equals(STRING)) {
-            return "TEXT";
-        } else {
-            return "CUSTOM";
-        }
+        return StringUtils.getTypeString(mFieldType);
     }
 
     public String getJavaTypeString() {
-        String typeLower = mFieldType.toLowerCase();
-        if (typeLower.equals(BOOLEAN)) {
-            return "boolean";
-        } else if (typeLower.equals(INT)) {
-            return "int";
-        } else if (typeLower.equals(LONG) || typeLower.equals(DOUBLE) || typeLower.equals(DATE_TIME)) {
-            return "double";
-        } else if (typeLower.equals(STRING)) {
-            return "String";
-        } else {
-            return mFieldType;
-        }
+        return StringUtils.getJavaTypeString(mFieldType);
     }
 
     public String getJavaTypeLongString() {
-        String typeLower = mFieldType.toLowerCase();
-        if (typeLower.equals(BOOLEAN)) {
-            return "Boolean";
-        } else if (typeLower.equals(INT)) {
-            return "Integer";
-        } else if (typeLower.equals(DOUBLE)) {
-            return "Double";
-        } else if (typeLower.equals(LONG) || typeLower.equals(DATE_TIME)) {
-            return "Long";
-        } else {
-            return "String";
-        }
+        return StringUtils.getJavaTypeLongString(mFieldType);
     }
 
     public String getJavaTypeStringGetter() {
-        if (mFieldType.equals(INT) || mFieldType.equals(BOOLEAN)) {
+        if (mFieldType.equals(StringUtils.INT) || mFieldType.equals(StringUtils.BOOLEAN)) {
             return "getInt";
-        } else if (mFieldType.equals(LONG) || mFieldType.equals(DATE_TIME)) {
+        } else if (mFieldType.equals(StringUtils.LONG) || mFieldType.equals(StringUtils.DATE_TIME)) {
             return "getLong";
-        } else if (mFieldName.equals(DOUBLE)) {
+        } else if (mFieldName.equals(StringUtils.DOUBLE)) {
             return "getDouble";
         } else {
             return "getString";

@@ -23,6 +23,12 @@ public class ContentProviderRelationshipModel {
     @SerializedName("left_table")
     private String mLeftTableName;
 
+    @SerializedName("left_field_name")
+    private String mLeftFieldName;
+
+    @SerializedName("left_field_type")
+    private String mLeftFieldType;
+
     private ContentProviderTableModel mLeftTableModel;
 
     @SerializedName("right_table")
@@ -103,6 +109,16 @@ public class ContentProviderRelationshipModel {
         return StringUtils.getConstantString(mRightTableName);
     }
 
+
+    public String getLeftTableFieldName() {
+        return mLeftFieldName;
+    }
+    public String getLeftTableFieldType() {
+        return (mLeftFieldType != null) ? StringUtils.getJavaTypeString(mLeftFieldType) : "Long";
+    }
+    public String getLeftTableFieldDBTypeString() {
+        return (mLeftFieldType != null) ? StringUtils.getTypeString(mLeftFieldType) : "INTEGER";
+    }
     public String getLeftTableForeignKey() {
         return StringUtils.getConstantString(mLeftTableName) + "_ID";
     }

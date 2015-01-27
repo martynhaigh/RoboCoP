@@ -25,6 +25,7 @@ public interface ${tableName}Table {
 #if( $participatingRelationships )
 #foreach( $relationship in $participatingRelationships )
 #set( $foreignKey = $relationship.getForeignKeyNameForTable($table) )
+#set( $foreignKeyType = $relationship.getLeftTableFieldDBTypeString() )
 #if( $foreignKey )
     String ${foreignKey} = "${foreignKey.toLowerCase()}";
 #if ( $insertFields && $insertFields.length() > 0 )
@@ -38,7 +39,7 @@ public interface ${tableName}Table {
 #set ($escapeFields = "?")
 #end
 #set ($allColumns = $allColumns + ", " + $foreignKey)
-#set ($tableCreate = $tableCreate + ", " + ${foreignKey.toLowerCase()} + " INTEGER")
+#set ($tableCreate = $tableCreate + ", " + ${foreignKey.toLowerCase()} + " " + ${foreignKeyType})
 #end
 
 #end

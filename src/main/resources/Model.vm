@@ -51,9 +51,10 @@ public class ${tableName} implements Serializable {
 #if( $participatingRelationships )
 #foreach( $relationship in $participatingRelationships )
 #set( $foreignKey = $relationship.getForeignKeyPrivateVariableNameForTable($table) )
+#set( $foreignKeyType = $relationship.getLeftTableFieldType() )
 #if( $foreignKey )
     @SerializedName("$relationship.getForeignKeyNameForTable($table).toLowerCase()")
-    private Long ${foreignKey};
+    private ${foreignKeyType} ${foreignKey};
 #end
 #end
 #end
@@ -127,8 +128,10 @@ public class ${tableName} implements Serializable {
 #foreach( $relationship in $participatingRelationships )
 #set( $foreignKeyTitleCase = $relationship.getForeignKeyVariableAsTitleCase($table) )
 #set( $foreignKeyConstant = $relationship.getForeignKeyNameForTable($table) )
+#set( $foreignKeyType = $relationship.getLeftTableFieldType() )
+
 #if( $foreignKeyTitleCase && $foreignKeyConstant)
-        set${foreignKeyTitleCase}(cursor.getLong(cursor.getColumnIndex(prefix + ${tableName}Table.${foreignKeyConstant})));
+        set${foreignKeyTitleCase}(cursor.get${foreignKeyType}(cursor.getColumnIndex(prefix + ${tableName}Table.${foreignKeyConstant})));
 #end
 #end
 #end
@@ -144,6 +147,7 @@ public class ${tableName} implements Serializable {
             mValues.put(${tableName}Table.${field.getConstantString()}, ${field.getPrivateVariableName()});
 #end
 #end
+            //TODO: Add support for relationship values
         }
         return mValues;
     }
@@ -178,14 +182,15 @@ public class ${tableName} implements Serializable {
 #set( $foreignKeyVariableName = $relationship.getForeignKeyVariableNameForTable($table) )
 #set( $foreignKeyPrivateVariableName = $relationship.getForeignKeyPrivateVariableNameForTable($table) )
 #set( $foreignKeyConstant = $relationship.getForeignKeyNameForTable($table) )
+#set( $foreignKeyType = $relationship.getLeftTableFieldType() )
 #if( $foreignKeyTitleCase )
-    public ${tableName} set${foreignKeyTitleCase}(final Long ${foreignKeyVariableName}) {
+    public ${tableName} set${foreignKeyTitleCase}(final ${foreignKeyType} ${foreignKeyVariableName}) {
         ${foreignKeyPrivateVariableName} = ${foreignKeyVariableName};
         mValues.put(${tableName}Table.${foreignKeyConstant}, ${foreignKeyVariableName});
         return this;
     }
 
-    public Long get${foreignKeyTitleCase}() {
+    public ${foreignKeyType} get${foreignKeyTitleCase}() {
             return ${foreignKeyPrivateVariableName};
     }
 
@@ -231,7 +236,6 @@ public class ${tableName} implements Serializable {
 #set( $foreignClassConstant = $relationship.getRightTableConstantName() )
 #set( $foreignKey = $relationship.getLeftTableForeignKey() )
 #if( $foreignClassName )
-
     public List<${foreignClassName}> get${foreignClassName}s(final Context context) {
         final Cursor c = context.getContentResolver().query(${providerName}Provider.${foreignClassConstant}_CONTENT_URI, null, ${foreignClassName}Table.WHERE_${foreignKey}_EQUALS,new String[]{String.valueOf(getObjectId())},null);
         return ${foreignClassName}.listFromCursor(c);
@@ -239,7 +243,6 @@ public class ${tableName} implements Serializable {
 #end
 #end
 #end
-
 
     public static List<${tableName}> listFromCursor(final Cursor cursor) {
         final List<${tableName}> list = new ArrayList<${tableName}>();
@@ -275,6 +278,11 @@ public class ${tableName} implements Serializable {
             values[i++] = item.getContentValues();
         }
         return values;
+    }
+
+    public static int delete(final Context context, final ${tableName} item) {
+        final ContentResolver contentResolver = context.getContentResolver();
+        return contentResolver.delete(${providerName}Provider.${tableConstantName}_CONTENT_URI.buildUpon().appendPath(item.getRowId().toString()).build(), null, null);
     }
 
     public static Uri insert(final Context context, final ${tableName} item) {

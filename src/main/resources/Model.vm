@@ -93,7 +93,7 @@ public class ${tableName} implements Serializable {
     // from a passed child class which extends this class.
     // Remember to implement a matching constructor in any child class
     // as needed with a call to `super(in)`.
-    public <T extends ${tableName}> ${tableName}(T in) {
+    public <T extends ${tableName}> ${tableName}(final T in) {
         setRowId(in.getRowId());
 
 #foreach ($field in $fields)
@@ -112,7 +112,7 @@ public class ${tableName} implements Serializable {
 #end
     }
 
-    public ${tableName}(final Cursor cursor, boolean prependTableName) {
+    public ${tableName}(final Cursor cursor, final boolean prependTableName) {
         String prefix = prependTableName ? ${tableName}Table.TABLE_NAME + "_" : "";
         setRowId(cursor.getLong(cursor.getColumnIndex(prefix + ${tableName}Table._ID)));
 #foreach ($field in $fields)
@@ -158,7 +158,7 @@ public class ${tableName} implements Serializable {
     }
 #foreach ($field in $fields)
 #if($field)
-    public void set${field.getNameAsTitleCase()}(${field.getJavaTypeString()} ${field.getFieldName()}) {
+    public void set${field.getNameAsTitleCase()}(final ${field.getJavaTypeString()} ${field.getFieldName()}) {
         ${field.getPrivateVariableName()} = ${field.getFieldName()};
 #if(!$field.isCustom())
         mValues.put(${tableName}Table.${field.getConstantString()}, ${field.getFieldName()});
@@ -179,7 +179,7 @@ public class ${tableName} implements Serializable {
 #set( $foreignKeyPrivateVariableName = $relationship.getForeignKeyPrivateVariableNameForTable($table) )
 #set( $foreignKeyConstant = $relationship.getForeignKeyNameForTable($table) )
 #if( $foreignKeyTitleCase )
-    public ${tableName} set${foreignKeyTitleCase}(Long ${foreignKeyVariableName}) {
+    public ${tableName} set${foreignKeyTitleCase}(final Long ${foreignKeyVariableName}) {
         ${foreignKeyPrivateVariableName} = ${foreignKeyVariableName};
         mValues.put(${tableName}Table.${foreignKeyConstant}, ${foreignKeyVariableName});
         return this;
@@ -196,27 +196,25 @@ public class ${tableName} implements Serializable {
     @Override
     public String toString() {
         return "id:" + getRowId()
-
 #foreach ($field in $fields)
 #if($field)
-               + " - ${field.getFieldName()}: " + get${field.getNameAsTitleCase()}()
+                     + " - ${field.getFieldName()}: " + get${field.getNameAsTitleCase()}()
 #end
 #end
-
 #if( $participatingRelationships )
 #foreach( $relationship in $participatingRelationships )
 #set( $foreignKeyTitleCase = $relationship.getForeignKeyVariableAsTitleCase($table) )
 #set( $foreignKey = $relationship.getForeignKeyNameForTable($table).toLowerCase() )
 #if( $foreignKey )
-               + " - ${foreignKey}: " + get${foreignKeyTitleCase}()
+                     + " - ${foreignKey}: " + get${foreignKeyTitleCase}()
 #end
 #end
 #end
-               ;
+                     ;
     }
 
-    public static ${tableName} get${tableName}ById(Context context, int id) {
-        Cursor cursor = context.getContentResolver().query(${providerName}Provider.${tableConstantName}_CONTENT_URI, null, ${tableName}Table.WHERE_ID_EQUALS, new String[]{String.valueOf(id)}, null);
+    public static ${tableName} get${tableName}ById(final Context context, final int id) {
+        final Cursor cursor = context.getContentResolver().query(${providerName}Provider.${tableConstantName}_CONTENT_URI, null, ${tableName}Table.WHERE_ID_EQUALS, new String[]{String.valueOf(id)}, null);
 #set( $varName = $tableName.toLowerCase() )
         ${tableName} ${varName};
         if (cursor != null && cursor.moveToFirst()) {
@@ -234,8 +232,8 @@ public class ${tableName} implements Serializable {
 #set( $foreignKey = $relationship.getLeftTableForeignKey() )
 #if( $foreignClassName )
 
-    public List<${foreignClassName}> get${foreignClassName}s(Context context) {
-        Cursor c = context.getContentResolver().query(${providerName}Provider.${foreignClassConstant}_CONTENT_URI, null, ${foreignClassName}Table.WHERE_${foreignKey}_EQUALS,new String[]{String.valueOf(getObjectId())},null);
+    public List<${foreignClassName}> get${foreignClassName}s(final Context context) {
+        final Cursor c = context.getContentResolver().query(${providerName}Provider.${foreignClassConstant}_CONTENT_URI, null, ${foreignClassName}Table.WHERE_${foreignKey}_EQUALS,new String[]{String.valueOf(getObjectId())},null);
         return ${foreignClassName}.listFromCursor(c);
     }
 #end
@@ -243,8 +241,8 @@ public class ${tableName} implements Serializable {
 #end
 
 
-    public static List<${tableName}> listFromCursor(Cursor cursor) {
-        List<${tableName}> list = new ArrayList<${tableName}>();
+    public static List<${tableName}> listFromCursor(final Cursor cursor) {
+        final List<${tableName}> list = new ArrayList<${tableName}>();
 
         if (cursor != null && cursor.moveToFirst()) {
             do {
@@ -262,16 +260,16 @@ public class ${tableName} implements Serializable {
 #set( $foreignKeyPrivateVariableName = $relationship.getForeignKeyPrivateVariableNameForTable($table) )
 #set( $foreignKeyConstant = $relationship.getForeignKeyNameForTable($table) )
 #if( $foreignKeyTitleCase )
-    public static List<${tableName}> get${tableName}sBy${foreignKeyTitleCase}(Context context, Long ${foreignKeyVariableName}) {
-        Cursor cursor = context.getContentResolver().query(${providerName}Provider.${tableConstantName}_CONTENT_URI, null, ${tableName}Table.WHERE_${foreignKeyConstant}_EQUALS, new String[]{String.valueOf(${foreignKeyVariableName})}, null);
+    public static List<${tableName}> get${tableName}sBy${foreignKeyTitleCase}(final Context context, final Long ${foreignKeyVariableName}) {
+        final Cursor cursor = context.getContentResolver().query(${providerName}Provider.${tableConstantName}_CONTENT_URI, null, ${tableName}Table.WHERE_${foreignKeyConstant}_EQUALS, new String[]{String.valueOf(${foreignKeyVariableName})}, null);
         return listFromCursor(cursor);
     }
 #end
 #end
 #end
 
-    public static ContentValues[] getContentValues(List<${tableName}> items) {
-        ContentValues[] values = new ContentValues[items.size()];
+    public static ContentValues[] getContentValues(final List<${tableName}> items) {
+        final ContentValues[] values = new ContentValues[items.size()];
         int i = 0;
         for(${tableName} item : items) {
             values[i++] = item.getContentValues();
@@ -279,11 +277,23 @@ public class ${tableName} implements Serializable {
         return values;
     }
 
-    public static Uri insert(Context context, ${tableName} item) {
+    public static Uri insert(final Context context, final ${tableName} item) {
         final ContentResolver contentResolver = context.getContentResolver();
-
         return contentResolver.insert(${providerName}Provider.${tableConstantName}_CONTENT_URI, item.getContentValues());
     }
+
+    public static int bulkInsert(final Context context, final List<${tableName}> items) {
+        final ContentResolver contentResolver = context.getContentResolver();
+
+        ContentValues[] newValues = new ContentValues[items.size()];
+        for (int i = 0; i < items.size(); i++) {
+            newValues[i] = items.get(i).getContentValues();
+        }
+        int rowsAdded = contentResolver.bulkInsert(${providerName}Provider.${tableConstantName}_CONTENT_URI, newValues);
+
+        return rowsAdded;
+    }
+
 
 // KEEP
 ${keep}

@@ -1,10 +1,12 @@
 package ${packageName}.model;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import com.google.gson.annotations.SerializedName;
+import android.net.Uri;
 
+import com.google.gson.annotations.SerializedName;
 
 import ${packageName}.database.table.${tableName}Table;
 #if( $participatingExternalRelationships )
@@ -260,16 +262,13 @@ public class ${tableName} implements Serializable {
 #set( $foreignKeyPrivateVariableName = $relationship.getForeignKeyPrivateVariableNameForTable($table) )
 #set( $foreignKeyConstant = $relationship.getForeignKeyNameForTable($table) )
 #if( $foreignKeyTitleCase )
-
     public static List<${tableName}> get${tableName}sBy${foreignKeyTitleCase}(Context context, Long ${foreignKeyVariableName}) {
         Cursor cursor = context.getContentResolver().query(${providerName}Provider.${tableConstantName}_CONTENT_URI, null, ${tableName}Table.WHERE_${foreignKeyConstant}_EQUALS, new String[]{String.valueOf(${foreignKeyVariableName})}, null);
         return listFromCursor(cursor);
     }
-
 #end
 #end
 #end
-
 
     public static ContentValues[] getContentValues(List<${tableName}> items) {
         ContentValues[] values = new ContentValues[items.size()];
@@ -278,6 +277,12 @@ public class ${tableName} implements Serializable {
             values[i++] = item.getContentValues();
         }
         return values;
+    }
+
+    public static Uri insert(Context context, ${tableName} item) {
+        final ContentResolver contentResolver = context.getContentResolver();
+
+        return contentResolver.insert(${providerName}Provider.${tableConstantName}_CONTENT_URI, item.getContentValues());
     }
 
 // KEEP

@@ -8,7 +8,6 @@ import java.util.Set;
 public class ContentProviderTableFieldModel {
 
 
-
     @SerializedName("type")
     private String mFieldType;
 
@@ -60,8 +59,8 @@ public class ContentProviderTableFieldModel {
         return StringUtils.getJavaTypeLongString(mFieldType);
     }
 
-    public String getJavaParcelWriter() {
-        String prefix = "write";
+    private String getJavaParcelMethodGenerator(String prefix) {
+
         if (mFieldType.equals(StringUtils.INT) || mFieldType.equals(StringUtils.BOOLEAN)) {
             return prefix + "Int";
         } else if (mFieldType.equals(StringUtils.LONG)) {
@@ -72,6 +71,17 @@ public class ContentProviderTableFieldModel {
             return prefix + "String";
         }
     }
+
+    public String getJavaParcelReader() {
+        return getJavaParcelMethodGenerator("read");
+
+    }
+
+    public String getJavaParcelWriter() {
+        return getJavaParcelMethodGenerator("write");
+
+    }
+
     public String getJavaTypeStringGetter(String prefix) {
         if (mFieldType.equals(StringUtils.INT) || mFieldType.equals(StringUtils.BOOLEAN)) {
             return prefix + "Int";
@@ -118,6 +128,7 @@ public class ContentProviderTableFieldModel {
     public boolean isCustom() {
         return "CUSTOM".equals(getTypeString());
     }
+
     public boolean isDateTime() {
         return "DATETIME".equals(getTypeString());
     }

@@ -94,12 +94,33 @@ public class ${tableName} implements Serializable, Parcelable {
         mRowId = in.readLong();
 #foreach ($field in $fields)
 #if($field && !$field.isCustom() && $field.getFieldType() != "boolean")
-        ${field.getPrivateVariableName()} = in.${field.getJavaTypeStringRead()}();
+        ${field.getPrivateVariableName()} = in.${field.getJavaParcelReader()}();
 #elseif ($field && $field.getFieldType() == "boolean")
-        ${field.getPrivateVariableName()} = in.${field.getJavaTypeStringRead()}() == 1;
+        ${field.getPrivateVariableName()} = in.${field.getJavaParcelReader()}() == 1;
 #end
 #end
     }
+
+
+@Override
+public void writeToParcel(Parcel dest, int flags) {
+    dest.writeLong(mRowId);
+#foreach ($field in $fields)
+#if($field && !$field.isCustom() && $field.getFieldType() != "boolean")
+    dest.${field.getJavaParcelWriter()}(${field.getPrivateVariableName()});
+#elseif ($field && $field.getFieldType() == "boolean")
+    dest.${field.getJavaParcelWriter()}(${field.getPrivateVariableName()} ? 1 : 0);
+    #end
+#end
+##    dest.writeLong(mRowId);
+##    dest.writeString(mObjectId);
+##    dest.writeString(mName);
+##    dest.writeString(mDescription);
+##    dest.writeString(mImageUrl);
+##    dest.writeInt(mDeleted ? 1 : 0);
+##    dest.writeInt(mSynced);
+##    dest.writeInt(mLastUpdated);
+}
 
     // Sometimes you're going to need to extend your generated model
     // in which case this constructor will facilitate copying values
@@ -312,26 +333,6 @@ public class ${tableName} implements Serializable, Parcelable {
         int rowsAdded = contentResolver.bulkInsert(${providerName}Provider.${tableConstantName}_CONTENT_URI, newValues);
 
         return rowsAdded;
-    }
-
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-#foreach ($field in $fields)
-#if($field && !$field.isCustom() && $field.getFieldType() != "boolean")
-            dest.${field.getJavaParcelWriter()}(${field.getPrivateVariableName()});
-#elseif ($field && $field.getFieldType() == "boolean")
-            dest.${field.getJavaParcelWriter()}(${field.getPrivateVariableName()} ? 1 : 0);
-#end
-#end
-##    dest.writeLong(mRowId);
-##    dest.writeString(mObjectId);
-##    dest.writeString(mName);
-##    dest.writeString(mDescription);
-##    dest.writeString(mImageUrl);
-##    dest.writeInt(mDeleted ? 1 : 0);
-##    dest.writeInt(mSynced);
-##    dest.writeInt(mLastUpdated);
     }
 
     @Override

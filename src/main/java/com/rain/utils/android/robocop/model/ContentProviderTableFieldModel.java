@@ -65,7 +65,7 @@ public class ContentProviderTableFieldModel {
             return prefix + "Int";
         } else if (mFieldType.equals(StringUtils.LONG)) {
             return prefix + "Long";
-        } else if (mFieldName.equals(StringUtils.DOUBLE) || mFieldType.equals(StringUtils.DATE_TIME)) {
+        } else if (mFieldType.equals(StringUtils.DOUBLE) || mFieldType.equals(StringUtils.DATE_TIME)) {
             return prefix + "Double";
         } else {
             return prefix + "String";
@@ -87,7 +87,7 @@ public class ContentProviderTableFieldModel {
             return prefix + "Int";
         } else if (mFieldType.equals(StringUtils.LONG) || mFieldType.equals(StringUtils.DATE_TIME)) {
             return prefix + "Long";
-        } else if (mFieldName.equals(StringUtils.DOUBLE)) {
+        } else if (mFieldType.equals(StringUtils.DOUBLE)) {
             return prefix + "Double";
         } else {
             return prefix + "String";

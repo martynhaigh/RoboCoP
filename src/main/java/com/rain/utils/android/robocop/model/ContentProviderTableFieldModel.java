@@ -60,16 +60,37 @@ public class ContentProviderTableFieldModel {
         return StringUtils.getJavaTypeLongString(mFieldType);
     }
 
-    public String getJavaTypeStringGetter() {
+    public String getJavaParcelWriter() {
+        String prefix = "write";
         if (mFieldType.equals(StringUtils.INT) || mFieldType.equals(StringUtils.BOOLEAN)) {
-            return "getInt";
-        } else if (mFieldType.equals(StringUtils.LONG) || mFieldType.equals(StringUtils.DATE_TIME)) {
-            return "getLong";
-        } else if (mFieldName.equals(StringUtils.DOUBLE)) {
-            return "getDouble";
+            return prefix + "Int";
+        } else if (mFieldType.equals(StringUtils.LONG)) {
+            return prefix + "Long";
+        } else if (mFieldName.equals(StringUtils.DOUBLE) || mFieldType.equals(StringUtils.DATE_TIME)) {
+            return prefix + "Double";
         } else {
-            return "getString";
+            return prefix + "String";
         }
+    }
+    public String getJavaTypeStringGetter(String prefix) {
+        if (mFieldType.equals(StringUtils.INT) || mFieldType.equals(StringUtils.BOOLEAN)) {
+            return prefix + "Int";
+        } else if (mFieldType.equals(StringUtils.LONG) || mFieldType.equals(StringUtils.DATE_TIME)) {
+            return prefix + "Long";
+        } else if (mFieldName.equals(StringUtils.DOUBLE)) {
+            return prefix + "Double";
+        } else {
+            return prefix + "String";
+        }
+    }
+
+    public String getJavaTypeStringRead() {
+        return getJavaTypeStringGetter("read");
+    }
+
+    public String getJavaTypeStringGet() {
+        return getJavaTypeStringGetter("get");
+
     }
 
     public String getUniqueConstraint() {

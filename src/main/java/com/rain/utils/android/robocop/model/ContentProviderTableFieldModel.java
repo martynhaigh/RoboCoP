@@ -8,6 +8,9 @@ import java.util.Set;
 public class ContentProviderTableFieldModel {
 
 
+    @SerializedName("key")
+    private String mKeyType;
+
     @SerializedName("type")
     private String mFieldType;
 
@@ -23,12 +26,17 @@ public class ContentProviderTableFieldModel {
     @SerializedName("default")
     private String mFieldDefault = "";
 
-    public ContentProviderTableFieldModel(String fieldType, String fieldName, String fieldUnique, String fieldSerialized, String fieldDefault) {
+    public ContentProviderTableFieldModel(String keyType, String fieldType, String fieldName, String fieldUnique, String fieldSerialized, String fieldDefault) {
+        mKeyType = keyType;
         mFieldType = fieldType;
         mFieldName = fieldName;
         mFieldUnique = fieldUnique;
         mFieldSerialized = fieldSerialized;
         mFieldDefault = fieldDefault;
+    }
+
+    public String getKeyType() {
+        return mKeyType;
     }
 
     public String getFieldType() {
@@ -141,5 +149,7 @@ public class ContentProviderTableFieldModel {
         return StringUtils.convertToTitleCase(mFieldName);
     }
 
-
+    public boolean isPrimaryKey() {
+        return "primary".equals(mKeyType);
+    }
 }

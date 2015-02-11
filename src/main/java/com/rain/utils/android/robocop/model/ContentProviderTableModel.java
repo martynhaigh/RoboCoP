@@ -16,6 +16,9 @@ public class ContentProviderTableModel {
     private List<ContentProviderTableFieldModel> mFields = new ArrayList<ContentProviderTableFieldModel>();
     private boolean mUsesDateTime;
 
+
+    private ContentProviderTableFieldModel mPrimaryKey;
+
     public ContentProviderTableModel(String tableName) {
         mTableName = tableName;
     }
@@ -24,8 +27,17 @@ public class ContentProviderTableModel {
         return mFields;
     }
 
-    public void addField(String fieldName, String type, String fieldUnique, String fieldSerialized, String fieldDefault) {
-        mFields.add(new ContentProviderTableFieldModel(type, fieldName, fieldUnique, fieldSerialized, fieldDefault));
+    public void addField(ContentProviderTableFieldModel field) {
+        if (field.isPrimaryKey()) {
+            if (!hasPrimaryKey()) {
+                setPrimaryKey(field);
+            }
+        }
+        mFields.add(0, field);
+    }
+
+    public void addField(String keyType, String fieldName, String type, String fieldUnique, String fieldSerialized, String fieldDefault) {
+        addField(new ContentProviderTableFieldModel(keyType, type, fieldName, fieldUnique, fieldSerialized, fieldDefault));
     }
 
     public String getTableName() {
@@ -52,5 +64,28 @@ public class ContentProviderTableModel {
     @Override
     public boolean equals(Object o) {
         return ((ContentProviderTableModel) o).getTableName().equals(getTableName());
+    }
+
+    public boolean hasPrimaryKey() throws IllegalStateException {
+        boolean primaryKeyFound = false;
+        for (ContentProviderTableFieldModel field : mFields) {
+            if (field.isPrimaryKey()) {
+                if (primaryKeyFound) {
+                    throw new IllegalStateException("Can't have more than one primary key in " + getTableName() + " [" + getPrimaryKey().getFieldName() + " - " + field.getFieldName() + "]");
+                }
+                setPrimaryKey(field);
+                primaryKeyFound = true;
+            }
+        }
+
+        return primaryKeyFound;
+    }
+
+    public void setPrimaryKey(ContentProviderTableFieldModel field) {
+        mPrimaryKey = field;
+    }
+
+    public ContentProviderTableFieldModel getPrimaryKey() {
+        return mPrimaryKey;
     }
 }

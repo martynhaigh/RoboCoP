@@ -4,15 +4,15 @@ public interface ${tableName}Table {
 #set( $tableNameLower = $tableName.toLowerCase() )
     String TABLE_NAME = "${tableNameLower}";
 
-    String _ID = "_id";
-
-#set ($allColumns = "_ID")
-#set ($tableCreate = "_id INTEGER PRIMARY KEY AUTOINCREMENT")
+#set ($allColumns = $primaryKey.getConstantString())
+#set ($tableCreate = $primaryKey.getConstantString().toLowerCase() + " " + $primaryKey.getTypeString() + " PRIMARY KEY")
 #foreach( $field in $fields )
 #if ($field)
     String ${field.getConstantString()} = "${field.getConstantString().toLowerCase()}";
+#if(!$field.isPrimaryKey())
 #set ($allColumns = $allColumns + ", " + $field.getConstantString())
 #set ($tableCreate = $tableCreate + ", " + $field.getConstantString().toLowerCase() + " " + $field.getTypeString())
+#end
 #if (!$insertFields)
 #set ($insertFields = $field.getConstantString().toLowerCase())
 #set ($escapeFields = "?")
@@ -59,7 +59,7 @@ public interface ${tableName}Table {
 
     String SQL_DROP = "DROP TABLE IF EXISTS ${tableNameLower}";
 
-    String WHERE_ID_EQUALS = _ID + "=?";
+    String WHERE_${primaryKey.getConstantString().toUpperCase()}_EQUALS = ${primaryKey.getConstantString()} + "=?";
 
 #if( $participatingRelationships )
 #foreach( $relationship in $participatingRelationships )

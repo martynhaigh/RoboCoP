@@ -41,15 +41,16 @@ public class ${tableName} implements Serializable, Parcelable {
 
     private static final long serialVersionUID = ${serialVersionUID}L;
 
-    private long mRowId;
 #foreach( $field in $fields )
 #if($field)
-
+#if($field.isPrimaryKey())
+    // Primary Key
+#end
     @SerializedName("$field.getFieldSerialized()")
     private ${field.getJavaTypeString()} ${field.getPrivateVariableName()};
-#end
-#end
 
+#end
+#end
 #if( $participatingRelationships )
 #foreach( $relationship in $participatingRelationships )
 #set( $foreignKey = $relationship.getForeignKeyPrivateVariableNameForTable($table) )
@@ -57,10 +58,10 @@ public class ${tableName} implements Serializable, Parcelable {
 #if( $foreignKey )
     @SerializedName("$relationship.getForeignKeyNameForTable($table).toLowerCase()")
     private ${foreignKeyType} ${foreignKey};
-#end
-#end
-#end
 
+#end
+#end
+#end
     private ContentValues mValues = new ContentValues();
 
     public ${tableName}() {}
@@ -70,28 +71,14 @@ public class ${tableName} implements Serializable, Parcelable {
     }
 
     public ${tableName}(final ContentValues values) {
-         mRowId = values.getAsLong(${tableName}Table._ID);
 #foreach ($field in $fields)
 #if($field && !$field.isCustom())
          ${field.getPrivateVariableName()} = values.getAs${field.getJavaTypeLongString()}(${tableName}Table.${field.getConstantString()});
 #end
 #end
-## #if( $table.isUsesDateTime() )
-##         try {
-## #foreach ($field in $fields)
-## #if($field && $field.isDateTime())
-##             ${field.getPrivateVariableName()} = dateTimeFormat.parse(values.getAsString(${tableName}Table.${field.getConstantString()}));
-## #end
-## #end
-##         } catch (ParseException e) {
-##             Log.e(LOGTAG, "Parsing ISO8601 datetime failed", e);
-##         }
-## #end
     }
 
-
     public ${tableName}(final Parcel in) {
-        mRowId = in.readLong();
 #foreach ($field in $fields)
 #if($field && !$field.isCustom() && $field.getFieldType() != "boolean")
         ${field.getPrivateVariableName()} = in.${field.getJavaParcelReader()}();
@@ -101,26 +88,16 @@ public class ${tableName} implements Serializable, Parcelable {
 #end
     }
 
-
-@Override
-public void writeToParcel(Parcel dest, int flags) {
-    dest.writeLong(mRowId);
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
 #foreach ($field in $fields)
 #if($field && !$field.isCustom() && $field.getFieldType() != "boolean")
-    dest.${field.getJavaParcelWriter()}(${field.getPrivateVariableName()});
+        dest.${field.getJavaParcelWriter()}(${field.getPrivateVariableName()});
 #elseif ($field && $field.getFieldType() == "boolean")
-    dest.${field.getJavaParcelWriter()}(${field.getPrivateVariableName()} ? 1 : 0);
-    #end
+        dest.${field.getJavaParcelWriter()}(${field.getPrivateVariableName()} ? 1 : 0);
 #end
-##    dest.writeLong(mRowId);
-##    dest.writeString(mObjectId);
-##    dest.writeString(mName);
-##    dest.writeString(mDescription);
-##    dest.writeString(mImageUrl);
-##    dest.writeInt(mDeleted ? 1 : 0);
-##    dest.writeInt(mSynced);
-##    dest.writeInt(mLastUpdated);
-}
+#end
+    }
 
     // Sometimes you're going to need to extend your generated model
     // in which case this constructor will facilitate copying values
@@ -128,15 +105,13 @@ public void writeToParcel(Parcel dest, int flags) {
     // Remember to implement a matching constructor in any child class
     // as needed with a call to `super(in)`.
     public <T extends ${tableName}> ${tableName}(final T in) {
-        setRowId(in.getRowId());
-
 #foreach ($field in $fields)
 #if($field && !$field.isCustom())
         set${field.getNameAsTitleCase()}(in.get${field.getNameAsTitleCase()}());
 #end
 #end
-
 #if( $participatingRelationships )
+
 #foreach( $relationship in $participatingRelationships )
 #set( $foreignKeyTitleCase = $relationship.getForeignKeyVariableAsTitleCase($table) )
 #if( $foreignKeyTitleCase )
@@ -148,7 +123,6 @@ public void writeToParcel(Parcel dest, int flags) {
 
     public ${tableName}(final Cursor cursor, final boolean prependTableName) {
         String prefix = prependTableName ? ${tableName}Table.TABLE_NAME + "_" : "";
-        setRowId(cursor.getLong(cursor.getColumnIndex(prefix + ${tableName}Table._ID)));
 #foreach ($field in $fields)
 #if($field && !$field.isCustom() && $field.getFieldType() != "boolean")
         set${field.getNameAsTitleCase()}(cursor.${field.getJavaTypeStringGet()}(cursor.getColumnIndex(prefix + ${tableName}Table.${field.getConstantString()})));
@@ -156,7 +130,6 @@ public void writeToParcel(Parcel dest, int flags) {
         set${field.getNameAsTitleCase()}(cursor.${field.getJavaTypeStringGet()}(cursor.getColumnIndex(prefix + ${tableName}Table.${field.getConstantString()})) > 0);
 #end
 #end
-
 #if( $participatingRelationships )
 #foreach( $relationship in $participatingRelationships )
 #set( $foreignKeyTitleCase = $relationship.getForeignKeyVariableAsTitleCase($table) )
@@ -172,9 +145,6 @@ public void writeToParcel(Parcel dest, int flags) {
 
     public ContentValues getContentValues() {
         if (mValues.size() == 0) {
-            if(mRowId > 0) {
-                mValues.put(${tableName}Table._ID, mRowId);
-            }
 #foreach ($field in $fields)
 #if($field && !$field.isCustom())
             mValues.put(${tableName}Table.${field.getConstantString()}, ${field.getPrivateVariableName()});
@@ -185,14 +155,6 @@ public void writeToParcel(Parcel dest, int flags) {
         return mValues;
     }
 
-    public Long getRowId() {
-        return mRowId;
-    }
-
-    public void setRowId(long _id) {
-        mRowId = _id;
-        mValues.put(${tableName}Table._ID, _id);
-    }
 #foreach ($field in $fields)
 #if($field)
     public void set${field.getNameAsTitleCase()}(final ${field.getJavaTypeString()} ${field.getFieldName()}) {
@@ -205,7 +167,6 @@ public void writeToParcel(Parcel dest, int flags) {
     public ${field.getJavaTypeString()} get${field.getNameAsTitleCase()}() {
             return ${field.getPrivateVariableName()};
     }
-
 #end
 #end
 
@@ -230,12 +191,11 @@ public void writeToParcel(Parcel dest, int flags) {
 #end
 #end
 #end
-
     @Override
     public String toString() {
-        return "id:" + getRowId()
+        return "${primaryKey.getFieldName()}: " + get${primaryKey.getNameAsTitleCase()}()
 #foreach ($field in $fields)
-#if($field)
+#if($field && !$field.isPrimaryKey())
                      + " - ${field.getFieldName()}: " + get${field.getNameAsTitleCase()}()
 #end
 #end
@@ -251,8 +211,8 @@ public void writeToParcel(Parcel dest, int flags) {
                      ;
     }
 
-    public static ${tableName} get${tableName}ById(final Context context, final int id) {
-        final Cursor cursor = context.getContentResolver().query(${providerName}Provider.${tableConstantName}_CONTENT_URI, null, ${tableName}Table.WHERE_ID_EQUALS, new String[]{String.valueOf(id)}, null);
+    public static ${tableName} get${tableName}By${primaryKey.getNameAsTitleCase()}(final Context context, final ${primaryKey.getJavaTypeString()} ${primaryKey.getFieldName()}) {
+        final Cursor cursor = context.getContentResolver().query(${providerName}Provider.${tableConstantName}_CONTENT_URI, null, ${tableName}Table.WHERE_${primaryKey.getConstantString()}_EQUALS, new String[]{String.valueOf( ${primaryKey.getFieldName()} )}, null);
 #set( $varName = $tableName.toLowerCase() )
         ${tableName} ${varName};
         if (cursor != null && cursor.moveToFirst()) {
@@ -315,7 +275,7 @@ public void writeToParcel(Parcel dest, int flags) {
 
     public static int delete(final Context context, final ${tableName} item) {
         final ContentResolver contentResolver = context.getContentResolver();
-        return contentResolver.delete(${providerName}Provider.${tableConstantName}_CONTENT_URI.buildUpon().appendPath(item.getRowId().toString()).build(), null, null);
+        return contentResolver.delete(${providerName}Provider.${tableConstantName}_CONTENT_URI.buildUpon().appendPath(String.valueOf(item.get${primaryKey.getNameAsTitleCase()}())).build(), null, null);
     }
 
     public static Uri insert(final Context context, final ${tableName} item) {

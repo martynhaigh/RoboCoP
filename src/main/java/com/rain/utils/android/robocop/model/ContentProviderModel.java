@@ -39,7 +39,12 @@ public class ContentProviderModel {
             System.out.println();
             System.out.println("Fields for " + table.getTableName() + ":");
             for(ContentProviderTableFieldModel field : table.getFields()) {
-                System.out.println("- " + field.getFieldName() + " (" + field.getFieldType() + ")");
+                if (field.isPrimaryKey()) {
+                    System.out.println("- " + field.getFieldName() + " (" + field.getFieldType() + ") - PRIMARY KEY");
+                } else {
+                    System.out.println("- " + field.getFieldName() + " (" + field.getFieldType() + ")");
+
+                }
             }
         }
     }
@@ -102,6 +107,15 @@ public class ContentProviderModel {
 
     public void initModels() {
         for (ContentProviderTableModel table : mTables) {
+            if(!table.hasPrimaryKey()) {
+                System.out.println("No primary key found for tablet " + table.getTableName() + " - adding row id");
+
+                ContentProviderTableFieldModel key = new ContentProviderTableFieldModel("primary", "long", "row_id", "REPLACE", "", "");
+                table.addField(key);
+            } else {
+                System.out.println("Primary key found for tablet " + table.getTableName() + " - " + table.getPrimaryKey().getFieldName());
+
+            }
             for (ContentProviderTableFieldModel model : table.getFields()) {
                 if (model.isDateTime()) {
                     table.setUsesDateTime(true);

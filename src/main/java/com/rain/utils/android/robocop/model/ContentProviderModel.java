@@ -189,10 +189,8 @@ public class ContentProviderModel {
                     }
                 }
                 if(leftTableForeignKey != null) {
-                    System.out.print("1 -");
                     relationship.setLeftTableField(leftTableForeignKey);
                 } else {
-                    System.out.print("2 -");
                     relationship.setLeftTableField(leftTable.getPrimaryKey());
                 }
                 System.out.println(relationship.getLeftTableName() + "." + relationship.getLeftTableFieldName() + " ("+ relationship.getLeftTableFieldType()+") -> " + relationship.getRightTableName() + "." + relationship.getRightTableFieldName() +" ("+ relationship.getLeftTableFieldType()+")");

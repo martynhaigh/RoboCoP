@@ -104,7 +104,6 @@ public class ContentProviderRelationshipModel {
     }
 
     public String getLeftTableFieldType() {
-        System.out.println(toString() + " getLeftTableFieldType - " + mLeftFieldType);
         return (mLeftFieldType != null) ? StringUtils.getJavaTypeString(mLeftFieldType) : "Long";
     }
 
@@ -177,8 +176,6 @@ public class ContentProviderRelationshipModel {
     }
 
     public void setLeftTableField(ContentProviderTableFieldModel leftTableField) {
-        System.out.println(getLeftTableName() + " -> " + getRightTableName() + " - " + "setLeftTableField = " + leftTableField.getFieldName() + " (" + leftTableField.getFieldType() + ")");
-
         if(leftTableField == null) {
             throw new IllegalArgumentException(getLeftTableName() + " -> " + getRightTableName());
         }

@@ -49,7 +49,7 @@ public class ContentProviderModel {
             for (ContentProviderRelationshipModel relationship : mRelationships) {
                 System.out.println("Checking relationship : " + relationship);
                 if(relationship.getRightTableModel().equals(table)) {
-                    System.out.println("- " + relationship.getRightTableFieldName() + " (" + relationship.getRightFieldType() + ") - FOREIGN KEY");
+                    System.out.println("- " + relationship.getRightTableFieldName() + " (" + relationship.getRightTableFieldType() + ") - FOREIGN KEY");
                 }
             }
         }
@@ -129,7 +129,7 @@ public class ContentProviderModel {
                 ContentProviderTableFieldModel key = new ContentProviderTableFieldModel("primary", "long", "row_id", "REPLACE", "", "");
                 table.addField(key);
             } else {
-                System.out.println("Primary key found for tablet " + table.getTableName() + " - " + table.getPrimaryKey().getFieldName());
+                System.out.println("Primary key found for tablet " + table.getTableName() + " - " + table.getPrimaryKey().getFieldName() + "(" + table.getPrimaryKey().getFieldType() + ")");
             }
             for (ContentProviderTableFieldModel model : table.getFields()) {
                 if (model.isDateTime()) {
@@ -143,6 +143,7 @@ public class ContentProviderModel {
     }
 
     public void inflateRelationships() {
+        System.out.println();
         System.out.println("Inflating Relationships");
 
         if (mRelationships != null) {
@@ -180,11 +181,6 @@ public class ContentProviderModel {
                 relationship.setLeftTableModel(leftTable);
                 relationship.setRightTableModel(rightTable);
 
-
-
-                System.out.println(relationship.getLeftTableName() + "." + relationship.getLeftTableFieldName() + " -> " + relationship.getRightTableName() + "." + relationship.getRightTableFieldName());
-
-
                 ContentProviderTableFieldModel leftTableForeignKey = null;
                 for (ContentProviderTableFieldModel field : leftTable.getFields()) {
                     if (field.getFieldName().equals(relationship.getLeftTableFieldName())) {
@@ -193,10 +189,14 @@ public class ContentProviderModel {
                     }
                 }
                 if(leftTableForeignKey != null) {
+                    System.out.print("1 -");
                     relationship.setLeftTableField(leftTableForeignKey);
                 } else {
+                    System.out.print("2 -");
                     relationship.setLeftTableField(leftTable.getPrimaryKey());
                 }
+                System.out.println(relationship.getLeftTableName() + "." + relationship.getLeftTableFieldName() + " ("+ relationship.getLeftTableFieldType()+") -> " + relationship.getRightTableName() + "." + relationship.getRightTableFieldName() +" ("+ relationship.getLeftTableFieldType()+")");
+
             }
         }
     }

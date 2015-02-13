@@ -230,7 +230,7 @@ public class ${tableName} implements Serializable, Parcelable {
 #set( $foreignKey = $relationship.getLeftTableForeignKey() )
 #if( $foreignClassName )
     public List<${foreignClassName}> get${foreignClassName}s(final Context context) {
-        final Cursor c = context.getContentResolver().query(${providerName}Provider.${foreignClassConstant}_CONTENT_URI, null, ${foreignClassName}Table.WHERE_${foreignKey}_EQUALS,new String[]{String.valueOf(getObjectId())},null);
+        final Cursor c = context.getContentResolver().query(${providerName}Provider.${foreignClassConstant}_CONTENT_URI, null, ${foreignClassName}Table.WHERE_${foreignKey}_EQUALS,new String[]{String.valueOf(get${relationship.getLeftTableFieldNameAsTitleCase()}())},null);
         return ${foreignClassName}.listFromCursor(c);
     }
 #end

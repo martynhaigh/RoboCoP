@@ -36,7 +36,6 @@ public class ContentProviderRelationshipModel {
     private ContentProviderTableModel mRightTableModel;
     private ContentProviderTableFieldModel leftTableField;
     private ContentProviderTableFieldModel rightTableField;
-    private String leftTableFieldType;
 
     @Override
     public boolean equals(Object obj) {
@@ -93,6 +92,9 @@ public class ContentProviderRelationshipModel {
     public String getLeftTableFieldName() {
         return mLeftFieldName;
     }
+    public String getLeftTableFieldNameAsTitleCase() {
+        return StringUtils.convertToTitleCase(mLeftFieldName);
+    }
     public String getRightTableFieldName() {
         return mLeftTableName + "_" + mLeftFieldName;
     }
@@ -102,6 +104,7 @@ public class ContentProviderRelationshipModel {
     }
 
     public String getLeftTableFieldType() {
+        System.out.println(toString() + " getLeftTableFieldType - " + mLeftFieldType);
         return (mLeftFieldType != null) ? StringUtils.getJavaTypeString(mLeftFieldType) : "Long";
     }
 
@@ -174,7 +177,7 @@ public class ContentProviderRelationshipModel {
     }
 
     public void setLeftTableField(ContentProviderTableFieldModel leftTableField) {
-        System.out.println(getLeftTableName() + " -> " + getRightTableName() + " - " + "setLeftTableField = " + leftTableField.getFieldName());
+        System.out.println(getLeftTableName() + " -> " + getRightTableName() + " - " + "setLeftTableField = " + leftTableField.getFieldName() + " (" + leftTableField.getFieldType() + ")");
 
         if(leftTableField == null) {
             throw new IllegalArgumentException(getLeftTableName() + " -> " + getRightTableName());
@@ -184,15 +187,16 @@ public class ContentProviderRelationshipModel {
         this.setLeftTableFieldType(leftTableField.getFieldType());
     }
 
-    public void setLeftTableFieldType(String leftTableFieldType) {
-        this.leftTableFieldType = leftTableFieldType;
+    public void setLeftTableFieldType(String leftFieldType) {
+
+        this.mLeftFieldType = leftFieldType;
     }
 
     public String toString() {
         return getLeftTableName() + " -> " + getRightTableName();
     }
 
-    public String getRightFieldType() {
+    public String getRightTableFieldType() {
         if(leftTableField == null) {
             throw new IllegalArgumentException(toString() + " - Cannot get right field type as left table field not defined.");
 

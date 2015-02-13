@@ -29,16 +29,18 @@ public class ContentProviderRelationshipModel {
     @SerializedName("left_field_type")
     private String mLeftFieldType;
 
-    private ContentProviderTableModel mLeftTableModel;
-
     @SerializedName("right_table")
     private String mRightTableName;
 
+    private ContentProviderTableModel mLeftTableModel;
     private ContentProviderTableModel mRightTableModel;
+    private ContentProviderTableFieldModel leftTableField;
+    private ContentProviderTableFieldModel rightTableField;
+    private String leftTableFieldType;
 
     @Override
     public boolean equals(Object obj) {
-        if(!(obj instanceof ContentProviderRelationshipModel)) {
+        if (!(obj instanceof ContentProviderRelationshipModel)) {
             System.out.println("not a ContentProviderRelationshipModel");
             return false;
         }
@@ -50,9 +52,7 @@ public class ContentProviderRelationshipModel {
         //System.out.println(other.getReferenceType() + "==" + getReferenceType() + " = " + other.getReferenceType().equals(getReferenceType()));
 
 
-
-        if(other.getLeftTableName().equals(getLeftTableName()) &&
-                other.getRightTableName().equals(getRightTableName())) {
+        if (other.getLeftTableName().equals(getLeftTableName()) && other.getRightTableName().equals(getRightTableName())) {
             return true;
         }
         return false;
@@ -69,6 +69,7 @@ public class ContentProviderRelationshipModel {
         return mReferenceType;
     }
 
+
     public ContentProviderTableModel getLeftTableModel() {
         return mLeftTableModel;
     }
@@ -76,6 +77,42 @@ public class ContentProviderRelationshipModel {
     public void setLeftTableModel(ContentProviderTableModel leftTableModel) {
         mLeftTableModel = leftTableModel;
     }
+
+    public String getLeftTableName() {
+        return mLeftTableName;
+    }
+
+    public String getLeftTableClassName() {
+        return StringUtils.convertToTitleCase(mLeftTableName);
+    }
+
+    public String getLeftTableConstantName() {
+        return StringUtils.getConstantString(mLeftTableName);
+    }
+
+    public String getLeftTableFieldName() {
+        return mLeftFieldName;
+    }
+    public String getRightTableFieldName() {
+        return mLeftTableName + "_" + mLeftFieldName;
+    }
+
+    public void setLeftTableFieldName(String leftFieldName) {
+        mLeftFieldName = leftFieldName;
+    }
+
+    public String getLeftTableFieldType() {
+        return (mLeftFieldType != null) ? StringUtils.getJavaTypeString(mLeftFieldType) : "Long";
+    }
+
+    public String getLeftTableFieldDBTypeString() {
+        return (mLeftFieldType != null) ? StringUtils.getTypeString(mLeftFieldType) : "INTEGER";
+    }
+
+    public String getLeftTableForeignKey() {
+        return StringUtils.getConstantString(mLeftTableName) + "_" + leftTableField.getConstantString();
+    }
+
 
     public ContentProviderTableModel getRightTableModel() {
         return mRightTableModel;
@@ -85,43 +122,18 @@ public class ContentProviderRelationshipModel {
         mRightTableModel = rightTableModel;
     }
 
-    public String getLeftTableName() {
-        return mLeftTableName;
-    }
-
     public String getRightTableName() {
         return mRightTableName;
-    }
-
-    public String getLeftTableClassName() {
-        return StringUtils.convertToTitleCase(mLeftTableName);
     }
 
     public String getRightTableClassName() {
         return StringUtils.convertToTitleCase(mRightTableName);
     }
 
-    public String getLeftTableConstantName() {
-        return StringUtils.getConstantString(mLeftTableName);
-    }
-
     public String getRightTableConstantName() {
         return StringUtils.getConstantString(mRightTableName);
     }
 
-
-    public String getLeftTableFieldName() {
-        return mLeftFieldName;
-    }
-    public String getLeftTableFieldType() {
-        return (mLeftFieldType != null) ? StringUtils.getJavaTypeString(mLeftFieldType) : "Long";
-    }
-    public String getLeftTableFieldDBTypeString() {
-        return (mLeftFieldType != null) ? StringUtils.getTypeString(mLeftFieldType) : "INTEGER";
-    }
-    public String getLeftTableForeignKey() {
-        return StringUtils.getConstantString(mLeftTableName) + "_ID";
-    }
 
     public String getCustomName() {
         return mCustomName;
@@ -133,8 +145,11 @@ public class ContentProviderRelationshipModel {
 
     public String getForeignKeyNameForTable(ContentProviderTableModel table) {
         if (table == null) return null;
+        if (leftTableField == null) {
+            throw new IllegalArgumentException(getLeftTableName() + " -> " + getRightTableName() + " (" + table.getTableName() + ")");
+        }
         if (mReferenceType.equals(RELATIONSHIP_TYPE_TO_MANY) && mRightTableModel == table) {
-            return mLeftTableModel.getTableConstantName() + "_ID";
+            return mLeftTableModel.getTableConstantName() + "_" + leftTableField.getConstantString();
         }
         return null;
     }
@@ -143,7 +158,7 @@ public class ContentProviderRelationshipModel {
         String constantName = getForeignKeyNameForTable(table);
         if (constantName == null) return null;
         constantName = StringUtils.convertToTitleCase(constantName);
-        return "m"+constantName;
+        return "m" + constantName;
     }
 
     public String getForeignKeyVariableNameForTable(ContentProviderTableModel table) {
@@ -156,5 +171,32 @@ public class ContentProviderRelationshipModel {
         String constantName = getForeignKeyNameForTable(table);
         if (constantName == null) return null;
         return StringUtils.convertToTitleCase(constantName);
+    }
+
+    public void setLeftTableField(ContentProviderTableFieldModel leftTableField) {
+        System.out.println(getLeftTableName() + " -> " + getRightTableName() + " - " + "setLeftTableField = " + leftTableField.getFieldName());
+
+        if(leftTableField == null) {
+            throw new IllegalArgumentException(getLeftTableName() + " -> " + getRightTableName());
+        }
+        this.leftTableField = leftTableField;
+        this.setLeftTableFieldName(leftTableField.getFieldName());
+        this.setLeftTableFieldType(leftTableField.getFieldType());
+    }
+
+    public void setLeftTableFieldType(String leftTableFieldType) {
+        this.leftTableFieldType = leftTableFieldType;
+    }
+
+    public String toString() {
+        return getLeftTableName() + " -> " + getRightTableName();
+    }
+
+    public String getRightFieldType() {
+        if(leftTableField == null) {
+            throw new IllegalArgumentException(toString() + " - Cannot get right field type as left table field not defined.");
+
+        }
+        return leftTableField.getFieldType();
     }
 }

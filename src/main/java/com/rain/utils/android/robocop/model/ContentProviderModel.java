@@ -46,6 +46,12 @@ public class ContentProviderModel {
 
                 }
             }
+            for (ContentProviderRelationshipModel relationship : mRelationships) {
+                System.out.println("Checking relationship : " + relationship);
+                if(relationship.getRightTableModel().equals(table)) {
+                    System.out.println("- " + relationship.getRightTableFieldName() + " (" + relationship.getRightFieldType() + ") - FOREIGN KEY");
+                }
+            }
         }
     }
 
@@ -80,6 +86,11 @@ public class ContentProviderModel {
         if (tableModel == null || mRelationships == null) return null;
         List<ContentProviderRelationshipModel> includedRelationships = new ArrayList<ContentProviderRelationshipModel>();
         for (ContentProviderRelationshipModel relationship : mRelationships) {
+//            if(relationship.getLeftTableFieldName() == null || relationship.getLeftTableFieldName().equals("")) {
+//
+//                System.out.println("No left table field defined, using primary key!");
+//                relationship.setLeftTableField(relationship.getLeftTableModel().getPrimaryKey());
+//            }
             if (relationship.getLeftTableModel() != tableModel && relationship.getRightTableModel() == tableModel) {
                 System.out.println("Adding " + relationship.getLeftTableName() + " -> " + relationship.getRightTableName() + "!");
                 includedRelationships.add(relationship);
@@ -106,7 +117,12 @@ public class ContentProviderModel {
     }
 
     public void initModels() {
+        System.out.println("Initiating models");
+
         for (ContentProviderTableModel table : mTables) {
+            System.out.println();
+            System.out.println("Initiating " + table.getTableName());
+
             if(!table.hasPrimaryKey()) {
                 System.out.println("No primary key found for tablet " + table.getTableName() + " - adding row id");
 
@@ -114,7 +130,6 @@ public class ContentProviderModel {
                 table.addField(key);
             } else {
                 System.out.println("Primary key found for tablet " + table.getTableName() + " - " + table.getPrimaryKey().getFieldName());
-
             }
             for (ContentProviderTableFieldModel model : table.getFields()) {
                 if (model.isDateTime()) {
@@ -128,8 +143,14 @@ public class ContentProviderModel {
     }
 
     public void inflateRelationships() {
+        System.out.println("Inflating Relationships");
+
         if (mRelationships != null) {
             for (ContentProviderRelationshipModel relationship : mRelationships) {
+                System.out.println();
+
+                System.out.println("Inflating relationship " + relationship.getLeftTableName() + " -> " + relationship.getRightTableName());
+
                 String leftTableName = relationship.getLeftTableName();
                 String rightTableName = relationship.getRightTableName();
                 if (leftTableName == null || leftTableName.length() == 0 || rightTableName == null || rightTableName.length() == 0) {
@@ -155,8 +176,27 @@ public class ContentProviderModel {
                     System.out.println("one or both of the referenced tables in a relationship could not be found in the table definition. please check your spelling");
                     return;
                 }
+
                 relationship.setLeftTableModel(leftTable);
                 relationship.setRightTableModel(rightTable);
+
+
+
+                System.out.println(relationship.getLeftTableName() + "." + relationship.getLeftTableFieldName() + " -> " + relationship.getRightTableName() + "." + relationship.getRightTableFieldName());
+
+
+                ContentProviderTableFieldModel leftTableForeignKey = null;
+                for (ContentProviderTableFieldModel field : leftTable.getFields()) {
+                    if (field.getFieldName().equals(relationship.getLeftTableFieldName())) {
+                        leftTableForeignKey = field;
+                        break;
+                    }
+                }
+                if(leftTableForeignKey != null) {
+                    relationship.setLeftTableField(leftTableForeignKey);
+                } else {
+                    relationship.setLeftTableField(leftTable.getPrimaryKey());
+                }
             }
         }
     }

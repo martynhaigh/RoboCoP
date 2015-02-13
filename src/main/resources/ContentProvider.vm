@@ -129,7 +129,7 @@ public abstract class ${providerName}ProviderBase extends ContentProvider {
 #foreach( $table in $tables )
 #set( $tableNameCaps = $table.getTableConstantName() )
             case ${tableNameCaps}_ID:
-                queryBuilder.appendWhere(${table.getTableClassName()}Table._ID + "=" + uri.getLastPathSegment());
+                queryBuilder.appendWhere(${table.getTableClassName()}Table.${table.getPrimaryKey().getConstantString()} + "=" + uri.getLastPathSegment());
             case ${tableNameCaps}_DIR:
                 queryBuilder.setTables(${table.getTableClassName()}Table.TABLE_NAME);
                 break;
@@ -138,11 +138,10 @@ public abstract class ${providerName}ProviderBase extends ContentProvider {
 #foreach( $relationship in $relationships )
 #set( $joinTableName = $relationship.getLeftTableConstantName() + "_JOIN_" + $relationship.getRightTableConstantName())
             case ${joinTableName}_DIR:
-                queryBuilder.setTables(${relationship.getLeftTableClassName()}Table.TABLE_NAME + " JOIN " + ${relationship.getRightTableClassName()}Table.TABLE_NAME + " ON (" + ${relationship.getLeftTableClassName()}Table.TABLE_NAME + "." + ${relationship.getLeftTableClassName()}Table._ID + "=" + ${relationship.getRightTableClassName()}Table.TABLE_NAME + "." + ${relationship.getRightTableClassName()}Table.${relationship.getLeftTableForeignKey()} + ")");
+                queryBuilder.setTables(${relationship.getLeftTableClassName()}Table.TABLE_NAME + " JOIN " + ${relationship.getRightTableClassName()}Table.TABLE_NAME + " ON (" + ${relationship.getLeftTableClassName()}Table.TABLE_NAME + "." + ${relationship.getLeftTableClassName()}Table.${relationship.getLeftTableFieldName().toUpperCase()} + "=" + ${relationship.getRightTableClassName()}Table.TABLE_NAME + "." + ${relationship.getRightTableClassName()}Table.${relationship.getLeftTableForeignKey()} + ")");
 
                 projection = new String[] {
                     //add left table columns
-                    ${relationship.getLeftTableClassName()}Table.TABLE_NAME + "._id AS " + ${relationship.getLeftTableClassName()}Table.TABLE_NAME + "__id",
 #foreach( $field in $relationship.getLeftTableModel().getFields())
 #if($field)
 #set( $fullFieldName = $relationship.getLeftTableClassName() + "Table." + $field.getConstantString() )
@@ -150,7 +149,6 @@ public abstract class ${providerName}ProviderBase extends ContentProvider {
                     ${fullTableName} + "." + ${fullFieldName} + " AS " + ${fullTableName} + "_" + ${fullFieldName},
 #end
 #end
-                    ${relationship.getRightTableClassName()}Table.TABLE_NAME + "._id AS " + ${relationship.getRightTableClassName()}Table.TABLE_NAME + "__id",
 #foreach( $field in $relationship.getRightTableModel().getFields())
 #if($field)
 #set( $fullFieldName = $relationship.getRightTableClassName() + "Table." + $field.getConstantString() )
@@ -285,9 +283,13 @@ public abstract class ${providerName}ProviderBase extends ContentProvider {
                     dbConnection.setTransactionSuccessful();
                     break;
                 case ${tableNameCaps}_ID:
+#if( $table.getPrimaryKey().getTypeString().equals("INTEGER"))
                    final long ${tableNameLower}Id = ContentUris.parseId(uri);
-                   updateCount = dbConnection.update(${table.getTableClassName()}Table.TABLE_NAME, values,
-                       ${table.getTableClassName()}Table._ID + "=" + ${tableNameLower}Id + (TextUtils.isEmpty(selection) ? "" : " AND (" + selection + ")"), selectionArgs);
+#else
+                   final String ${tableNameLower}Id = uri.getLastPathSegment();
+#end
+                    updateCount = dbConnection.update(${table.getTableClassName()}Table.TABLE_NAME, values,
+                       ${table.getTableClassName()}Table.${table.getPrimaryKey().getConstantString()} + "=" + ${tableNameLower}Id + (TextUtils.isEmpty(selection) ? "" : " AND (" + selection + ")"), selectionArgs);
 
 #if( $includedRelations )
 #foreach( $includedRelation in $includedRelations )
@@ -346,7 +348,7 @@ public abstract class ${providerName}ProviderBase extends ContentProvider {
                     dbConnection.setTransactionSuccessful();
                     break;
                 case ${tableNameCaps}_ID:
-                    deleteCount = dbConnection.delete(${table.getTableClassName()}Table.TABLE_NAME, ${table.getTableClassName()}Table.WHERE_ID_EQUALS, new String[] { uri.getLastPathSegment() });
+                    deleteCount = dbConnection.delete(${table.getTableClassName()}Table.TABLE_NAME, ${table.getTableClassName()}Table.WHERE_${table.getPrimaryKey().getConstantString()}_EQUALS, new String[] { uri.getLastPathSegment() });
 
 #if( $includedRelations )
 #foreach( $includedRelation in $includedRelations )

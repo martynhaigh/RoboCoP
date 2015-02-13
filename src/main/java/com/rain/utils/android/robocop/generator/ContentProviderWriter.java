@@ -23,6 +23,10 @@ public class ContentProviderWriter {
         try {
             ContentProviderModel model = gson.fromJson(readFile(schemaPath), ContentProviderModel.class);
             model.initModels();
+
+            // TODO - fix relationships to use foreign key syntax and not lefttablefieldname etc.
+            // TODO - fix relationships to lookup fields
+            // TODO - fix content provider update and delete methods
             model.inflateRelationships();
             model.printContents();
             createContentProvider(model, sourcePath);
@@ -51,10 +55,12 @@ public class ContentProviderWriter {
             props.load(url.openStream());
             VelocityEngine engine = new VelocityEngine(props);
             engine.init();
+            System.out.println("Create base context: ");
 
             VelocityContext baseContext = new VelocityContext();
             baseContext.put("packageName", contentProviderModel.getPackage());
             baseContext.put("providerModel", contentProviderModel);
+            System.out.println("Create provider context: ");
 
             VelocityContext providerContext = new VelocityContext(baseContext);
             providerContext.put("providerName", contentProviderModel.getProviderName());
@@ -62,18 +68,25 @@ public class ContentProviderWriter {
             providerContext.put("relationships", contentProviderModel.getRelationships());
             writeFile(engine, providerContext, "ContentProvider.vm", providerPath, "/" + contentProviderModel.getProviderName() + "ProviderBase.java");
             writeFile(engine, providerContext, "ProviderXML.vm", providerXMLPath, "/content-provider.xml");
+            System.out.println("Create database context: ");
 
             VelocityContext databaseContext = new VelocityContext(providerContext);
             databaseContext.put("databaseVersion", contentProviderModel.getDatabaseVersion());
             writeFile(engine, databaseContext, "Database.vm", databasePath, "/" + contentProviderModel.getProviderName() + "Database.java");
 
             for (ContentProviderTableModel table : contentProviderModel.getTables()) {
+                System.out.println("Processing table context: " + table.getTableName());
+
                 VelocityContext tableContext = new VelocityContext(baseContext);
                 tableContext.put("providerModel", contentProviderModel);
                 tableContext.put("providerName", contentProviderModel.getProviderName());
                 tableContext.put("tableConstantName", table.getTableConstantName());
                 tableContext.put("table", table);
+                System.out.println("Processing participatingRelationships: " + table.getTableName());
+
                 tableContext.put("participatingRelationships", contentProviderModel.getRelationshipsForTable(table));
+
+                System.out.println("Processing participatingExternalRelationships: " + table.getTableName());
                 tableContext.put("participatingExternalRelationships", contentProviderModel.getExternalRelationshipsForTable(table));
                 tableContext.put("tableName", table.getTableClassName());
                 tableContext.put("fields", table.getFields());

@@ -51,6 +51,8 @@ public class ContentProviderTableFieldModel {
         return mFieldDefault;
     }
 
+    public boolean hasDefaultSet() { return mFieldDefault != null && !mFieldDefault.equals(""); }
+
     public String getConstantString() {
         return StringUtils.getConstantString(mFieldName);
     }

@@ -43,11 +43,15 @@ public class ${tableName} implements Serializable, Parcelable {
 
 #foreach( $field in $fields )
 #if($field)
+#set( $default = "" )
+#if($field.hasDefaultSet())
+#set( $default = " = " + $field.getFieldDefault() )
+#end
 #if($field.isPrimaryKey())
     // Primary Key
 #end
     @SerializedName("$field.getFieldSerialized()")
-    private ${field.getJavaTypeString()} ${field.getPrivateVariableName()};
+    private ${field.getJavaTypeString()} ${field.getPrivateVariableName()}${default};
 
 #end
 #end
@@ -56,6 +60,8 @@ public class ${tableName} implements Serializable, Parcelable {
 #set( $foreignKey = $relationship.getForeignKeyPrivateVariableNameForTable($table) )
 #set( $foreignKeyType = $relationship.getLeftTableFieldType() )
 #if( $foreignKey )
+
+    // Foreign Key
     @SerializedName("$relationship.getForeignKeyNameForTable($table).toLowerCase()")
     private ${foreignKeyType} ${foreignKey};
 
@@ -76,6 +82,7 @@ public class ${tableName} implements Serializable, Parcelable {
          ${field.getPrivateVariableName()} = values.getAs${field.getJavaTypeLongString()}(${tableName}Table.${field.getConstantString()});
 #end
 #end
+        //TODO relationship values
     }
 
     public ${tableName}(final Parcel in) {
@@ -86,6 +93,7 @@ public class ${tableName} implements Serializable, Parcelable {
         ${field.getPrivateVariableName()} = in.${field.getJavaParcelReader()}() == 1;
 #end
 #end
+        //TODO relationship values
     }
 
     @Override
@@ -97,6 +105,7 @@ public class ${tableName} implements Serializable, Parcelable {
         dest.${field.getJavaParcelWriter()}(${field.getPrivateVariableName()} ? 1 : 0);
 #end
 #end
+        //TODO relationship values
     }
 
     // Sometimes you're going to need to extend your generated model

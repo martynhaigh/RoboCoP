@@ -70,9 +70,9 @@ public class StringUtils {
             return "boolean";
         } else if (typeLower.equals(INT)) {
             return "int";
-        } else if (typeLower.equals(LONG)) {
+        } else if (typeLower.equals(LONG) || typeLower.equals(DATE_TIME)) {
             return "long";
-        } else if (typeLower.equals(DOUBLE) || typeLower.equals(DATE_TIME)) {
+        } else if (typeLower.equals(DOUBLE)) {
             return "double";
         } else if (typeLower.equals(STRING)) {
             return "String";

@@ -82,7 +82,16 @@ public class ${tableName} implements Serializable, Parcelable {
          ${field.getPrivateVariableName()} = values.getAs${field.getJavaTypeLongString()}(${tableName}Table.${field.getConstantString()});
 #end
 #end
-        //TODO relationship values
+#if( $participatingRelationships )
+
+         // Foreign keys.
+#foreach( $relationship in $participatingRelationships )
+#set( $foreignKeyConstant = $relationship.getForeignKeyNameForTable($table) )
+#set( $foreignKey = $relationship.getForeignKeyPrivateVariableNameForTable($table) )
+#set( $foreignKeyType = $relationship.getLeftTableFieldType() )
+         ${foreignKey} = values.getAs${foreignKeyType}(${tableName}Table.${foreignKeyConstant});
+#end
+#end
     }
 
     public ${tableName}(final Parcel in) {
@@ -93,7 +102,15 @@ public class ${tableName} implements Serializable, Parcelable {
         ${field.getPrivateVariableName()} = in.${field.getJavaParcelReader()}() == 1;
 #end
 #end
-        //TODO relationship values
+#if( $participatingRelationships )
+
+        // Foreign keys.
+#foreach( $relationship in $participatingRelationships )
+#set( $foreignKey = $relationship.getForeignKeyPrivateVariableNameForTable($table) )
+#set( $foreignKeyType = $relationship.getLeftTableFieldType() )
+        ${foreignKey} = in.read${foreignKeyType}();
+#end
+#end
     }
 
     @Override
@@ -105,7 +122,15 @@ public class ${tableName} implements Serializable, Parcelable {
         dest.${field.getJavaParcelWriter()}(${field.getPrivateVariableName()} ? 1 : 0);
 #end
 #end
-        //TODO relationship values
+#if( $participatingRelationships )
+
+        // Foreign keys.
+#foreach( $relationship in $participatingRelationships )
+#set( $foreignKey = $relationship.getForeignKeyPrivateVariableNameForTable($table) )
+#set( $foreignKeyType = $relationship.getLeftTableFieldType() )
+        dest.write${foreignKeyType}(${foreignKey});
+#end
+#end
     }
 
     // Sometimes you're going to need to extend your generated model
@@ -121,6 +146,7 @@ public class ${tableName} implements Serializable, Parcelable {
 #end
 #if( $participatingRelationships )
 
+        // Foreign keys.
 #foreach( $relationship in $participatingRelationships )
 #set( $foreignKeyTitleCase = $relationship.getForeignKeyVariableAsTitleCase($table) )
 #if( $foreignKeyTitleCase )
@@ -140,11 +166,12 @@ public class ${tableName} implements Serializable, Parcelable {
 #end
 #end
 #if( $participatingRelationships )
+
+        // Foreign keys.
 #foreach( $relationship in $participatingRelationships )
 #set( $foreignKeyTitleCase = $relationship.getForeignKeyVariableAsTitleCase($table) )
 #set( $foreignKeyConstant = $relationship.getForeignKeyNameForTable($table) )
 #set( $foreignKeyType = $relationship.getLeftTableFieldType() )
-
 #if( $foreignKeyTitleCase && $foreignKeyConstant)
         set${foreignKeyTitleCase}(cursor.get${foreignKeyType}(cursor.getColumnIndex(prefix + ${tableName}Table.${foreignKeyConstant})));
 #end
@@ -155,11 +182,23 @@ public class ${tableName} implements Serializable, Parcelable {
     public ContentValues getContentValues() {
         if (mValues.size() == 0) {
 #foreach ($field in $fields)
-#if($field && !$field.isCustom())
+#if($field && !$field.isCustom() && $field.getFieldType() != "boolean")
             mValues.put(${tableName}Table.${field.getConstantString()}, ${field.getPrivateVariableName()});
+#elseif ($field && $field.getFieldType() == "boolean")
+            mValues.put(${tableName}Table.${field.getConstantString()}, ${field.getPrivateVariableName()} ? 1 : 0);
 #end
 #end
-            //TODO: Add support for relationship values
+#if( $participatingRelationships )
+
+            // Foreign keys.
+#foreach( $relationship in $participatingRelationships )
+#set( $foreignKeyConstant = $relationship.getForeignKeyNameForTable($table) )
+#set( $foreignKey = $relationship.getForeignKeyPrivateVariableNameForTable($table) )
+#if( $foreignKeyTitleCase && $foreignKeyConstant)
+            mValues.put(${tableName}Table.${foreignKeyConstant}, ${foreignKey});
+#end
+#end
+#end
         }
         return mValues;
     }

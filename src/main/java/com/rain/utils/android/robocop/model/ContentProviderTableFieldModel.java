@@ -48,6 +48,17 @@ public class ContentProviderTableFieldModel {
     }
 
     public String getFieldDefault() {
+
+//        if (mFieldType.equals(StringUtils.BOOLEAN)) {
+//            if(mFieldDefault.toLowerCase().equals("true")) {
+//                return "1";
+//            }
+//            return "0";
+//        } else
+
+        if (mFieldType.equals(StringUtils.STRING)) {
+            return "\"" + mFieldDefault + "\"";
+        }
         return mFieldDefault;
     }
 
@@ -73,9 +84,9 @@ public class ContentProviderTableFieldModel {
 
         if (mFieldType.equals(StringUtils.INT) || mFieldType.equals(StringUtils.BOOLEAN)) {
             return prefix + "Int";
-        } else if (mFieldType.equals(StringUtils.LONG)) {
+        } else if (mFieldType.equals(StringUtils.LONG) || mFieldType.equals(StringUtils.DATE_TIME)) {
             return prefix + "Long";
-        } else if (mFieldType.equals(StringUtils.DOUBLE) || mFieldType.equals(StringUtils.DATE_TIME)) {
+        } else if (mFieldType.equals(StringUtils.DOUBLE)) {
             return prefix + "Double";
         } else {
             return prefix + "String";

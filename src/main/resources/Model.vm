@@ -331,6 +331,12 @@ public class ${tableName} implements Serializable, Parcelable {
         return contentResolver.insert(${providerName}Provider.${tableConstantName}_CONTENT_URI, item.getContentValues());
     }
 
+
+    public static int update(final Context context, final ${tableName} item) {
+        final ContentResolver contentResolver = context.getContentResolver();
+        return contentResolver.update(${providerName}Provider.${tableConstantName}_CONTENT_URI, item.getContentValues(), ${tableName}Table.WHERE_${primaryKey.getConstantString().toUpperCase()}_EQUALS, new String[] {item.get${primaryKey.getNameAsTitleCase()}()});
+    }
+
     public static int bulkInsert(final Context context, final List<${tableName}> items) {
         final ContentResolver contentResolver = context.getContentResolver();
 

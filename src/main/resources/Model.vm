@@ -36,13 +36,14 @@ import java.io.Serializable;
 
 public class ${tableName} implements Serializable, Parcelable {
 
-    public final String LOGTAG = "${tableName}";
+    private static final String LOGTAG = ${tableName}.class.getSimpleName();
+
 #if( $table.isUsesDateTime() )
 
     private final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("${providerModel.getDateTimeFormat()}");
 #end
 
-    private static final long serialVersionUID = ${serialVersionUID}L;
+    private transient static final long serialVersionUID = ${serialVersionUID}L;
 
 #foreach( $field in $fields )
 #if($field)
@@ -71,7 +72,7 @@ public class ${tableName} implements Serializable, Parcelable {
 #end
 #end
 #end
-    private ContentValues mValues = new ContentValues();
+    private transient ContentValues mValues = new ContentValues();
 
     public ${tableName}() {}
 
@@ -387,7 +388,7 @@ public class ${tableName} implements Serializable, Parcelable {
     }
 
 
-    public void writeObject(ObjectOutputStream out) throws IOException {
+    protected void writeObject(ObjectOutputStream out) throws IOException {
 #foreach ($field in $fields)
 #if($field && !$field.isCustom())
         out.${field.getJavaSerializableWriter()}(${field.getPrivateVariableName()});
@@ -404,7 +405,7 @@ public class ${tableName} implements Serializable, Parcelable {
 #end
     }
 
-    public void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+    protected void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 #foreach ($field in $fields)
 #if($field && !$field.isCustom())
         ${field.getPrivateVariableName()} = (${field.getJavaTypeLongString()}) in.${field.getJavaSerializableReader()}();

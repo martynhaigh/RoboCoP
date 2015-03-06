@@ -80,47 +80,29 @@ public class ContentProviderTableFieldModel {
         return StringUtils.getJavaTypeLongString(mFieldType);
     }
 
-    private String getJavaParcelMethodGenerator(String prefix) {
-
-        if (mFieldType.equals(StringUtils.INT) || mFieldType.equals(StringUtils.BOOLEAN)) {
-            return prefix + "Int";
-        } else if (mFieldType.equals(StringUtils.LONG) || mFieldType.equals(StringUtils.DATE_TIME)) {
-            return prefix + "Long";
-        } else if (mFieldType.equals(StringUtils.DOUBLE)) {
-            return prefix + "Double";
-        } else {
-            return prefix + "String";
-        }
-    }
-
     public String getJavaParcelReader() {
-        return getJavaParcelMethodGenerator("read");
-
+        return StringUtils.getJavaParcelMethodGenerator(mFieldType, "read");
     }
 
     public String getJavaParcelWriter() {
-        return getJavaParcelMethodGenerator("write");
-
+        return StringUtils.getJavaParcelMethodGenerator(mFieldType, "write");
     }
 
-    public String getJavaTypeStringGetter(String prefix) {
-        if (mFieldType.equals(StringUtils.INT) || mFieldType.equals(StringUtils.BOOLEAN)) {
-            return prefix + "Int";
-        } else if (mFieldType.equals(StringUtils.LONG) || mFieldType.equals(StringUtils.DATE_TIME)) {
-            return prefix + "Long";
-        } else if (mFieldType.equals(StringUtils.DOUBLE)) {
-            return prefix + "Double";
-        } else {
-            return prefix + "String";
-        }
+
+    public String getJavaSerializableReader() {
+        return StringUtils.getJavaSerializableMethodGenerator(mFieldType, "read");
+    }
+
+    public String getJavaSerializableWriter() {
+        return StringUtils.getJavaSerializableMethodGenerator(mFieldType, "write");
     }
 
     public String getJavaTypeStringRead() {
-        return getJavaTypeStringGetter("read");
+        return StringUtils.getJavaTypeStringGetter(mFieldType, "read");
     }
 
     public String getJavaTypeStringGet() {
-        return getJavaTypeStringGetter("get");
+        return StringUtils.getJavaTypeStringGetter(mFieldType, "get");
 
     }
 

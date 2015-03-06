@@ -184,8 +184,11 @@ public class ContentProviderRelationshipModel {
         this.setLeftTableFieldType(leftTableField.getFieldType());
     }
 
-    public void setLeftTableFieldType(String leftFieldType) {
 
+    public ContentProviderTableFieldModel getleftTableField() {
+        return leftTableField;
+    }
+    public void setLeftTableFieldType(String leftFieldType) {
         this.mLeftFieldType = leftFieldType;
     }
 

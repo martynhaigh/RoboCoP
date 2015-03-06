@@ -6,6 +6,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import android.os.Parcel;
 import android.os.Parcelable;
 import com.google.gson.annotations.SerializedName;
@@ -304,7 +307,7 @@ public class ${tableName} implements Serializable, Parcelable {
 #set( $foreignKeyPrivateVariableName = $relationship.getForeignKeyPrivateVariableNameForTable($table) )
 #set( $foreignKeyConstant = $relationship.getForeignKeyNameForTable($table) )
 #if( $foreignKeyTitleCase )
-    public static List<${tableName}> get${tableName}sBy${foreignKeyTitleCase}(final Context context, final Long ${foreignKeyVariableName}) {
+    public static List<${tableName}> get${tableName}sBy${foreignKeyTitleCase}(final Context context, final ${relationship.getLeftTableFieldType()} ${foreignKeyVariableName}) {
         final Cursor cursor = context.getContentResolver().query(${providerName}Provider.${tableConstantName}_CONTENT_URI, null, ${tableName}Table.WHERE_${foreignKeyConstant}_EQUALS, new String[]{String.valueOf(${foreignKeyVariableName})}, null);
         return listFromCursor(cursor);
     }
@@ -312,7 +315,7 @@ public class ${tableName} implements Serializable, Parcelable {
 #end
 #end
 
-    public static ContentValues[] getContentValues(final List<${tableName}> items) {
+    public static ContentValues[] getContentValues(final List<? extends ${tableName}> items) {
         final ContentValues[] values = new ContentValues[items.size()];
         int i = 0;
         for(${tableName} item : items) {
@@ -321,23 +324,23 @@ public class ${tableName} implements Serializable, Parcelable {
         return values;
     }
 
-    public static int delete(final Context context, final ${tableName} item) {
+    public static <T extends ${tableName}> int delete(final Context context, final T item) {
         final ContentResolver contentResolver = context.getContentResolver();
         return contentResolver.delete(${providerName}Provider.${tableConstantName}_CONTENT_URI.buildUpon().appendPath(String.valueOf(item.get${primaryKey.getNameAsTitleCase()}())).build(), null, null);
     }
 
-    public static Uri insert(final Context context, final ${tableName} item) {
+    public static <T extends ${tableName}> Uri insert(final Context context, final T item) {
         final ContentResolver contentResolver = context.getContentResolver();
         return contentResolver.insert(${providerName}Provider.${tableConstantName}_CONTENT_URI, item.getContentValues());
     }
 
 
-    public static int update(final Context context, final ${tableName} item) {
+    public static <T extends ${tableName}> int update(final Context context, final T item) {
         final ContentResolver contentResolver = context.getContentResolver();
         return contentResolver.update(${providerName}Provider.${tableConstantName}_CONTENT_URI, item.getContentValues(), ${tableName}Table.WHERE_${primaryKey.getConstantString().toUpperCase()}_EQUALS, new String[] {item.get${primaryKey.getNameAsTitleCase()}()});
     }
 
-    public static int bulkInsert(final Context context, final List<${tableName}> items) {
+    public static int bulkInsert(final Context context, final List<? extends ${tableName}> items) {
         final ContentResolver contentResolver = context.getContentResolver();
 
         ContentValues[] newValues = new ContentValues[items.size()];
@@ -347,6 +350,13 @@ public class ${tableName} implements Serializable, Parcelable {
         int rowsAdded = contentResolver.bulkInsert(${providerName}Provider.${tableConstantName}_CONTENT_URI, newValues);
 
         return rowsAdded;
+    }
+
+
+    public static void bulkUpdate(final Context context, final List<? extends ${tableName}> items) {
+        for (${tableName} item : items) {
+            ${tableName}.update(context, item);
+        }
     }
 
     @Override
@@ -362,6 +372,54 @@ public class ${tableName} implements Serializable, Parcelable {
             return new ${tableName}[size];
         }
     };
+
+    public static List<${tableName}> get${tableName}s(Context context) {
+        return ${tableName}.getSorted${tableName}s(context, null);
+    }
+
+    public static List<${tableName}> getSorted${tableName}s(Context context, String sortOrder) {
+        return ${tableName}.listFromCursor(context.getContentResolver().query(MoteProvider.${tableConstantName}_CONTENT_URI, null, null, null, sortOrder));
+    }
+
+
+    public static List<${tableName}> query(Context context, String[] projection,  String selection, String[] selectionArgs, String sortOrder) {
+        return ${tableName}.listFromCursor(context.getContentResolver().query(MoteProvider.${tableConstantName}_CONTENT_URI, projection, selection, selectionArgs, sortOrder));
+    }
+
+
+    public void writeObject(ObjectOutputStream out) throws IOException {
+#foreach ($field in $fields)
+#if($field && !$field.isCustom())
+        out.${field.getJavaSerializableWriter()}(${field.getPrivateVariableName()});
+#end
+#end
+#if( $participatingRelationships )
+
+        // Foreign keys.
+#foreach( $relationship in $participatingRelationships )
+#set( $foreignKeyField = $relationship.getleftTableField() )
+#set( $foreignKey = $relationship.getForeignKeyPrivateVariableNameForTable($table) )
+        out.${foreignKeyField.getJavaSerializableWriter()}(${foreignKey});
+#end
+#end
+    }
+
+    public void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+#foreach ($field in $fields)
+#if($field && !$field.isCustom())
+        ${field.getPrivateVariableName()} = (${field.getJavaTypeLongString()}) in.${field.getJavaSerializableReader()}();
+#end
+#end
+#if( $participatingRelationships )
+
+        // Foreign keys.
+#foreach( $relationship in $participatingRelationships )
+#set( $foreignKeyField = $relationship.getleftTableField() )
+#set( $foreignKey = $relationship.getForeignKeyPrivateVariableNameForTable($table) )
+        ${foreignKey} = (${foreignKeyField.getJavaTypeLongString()}) in.${foreignKeyField.getJavaSerializableReader()}();
+#end
+#end
+    }
 
 // KEEP
 ${keep}

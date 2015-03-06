@@ -95,4 +95,43 @@ public class StringUtils {
             return "String";
         }
     }
+
+    public static String getJavaSerializableMethodGenerator(String fieldtype, String prefix) {
+        if (fieldtype.equals(StringUtils.INT) ) {
+            return prefix + "Int";
+        } else if (fieldtype.equals(StringUtils.BOOLEAN)) {
+            return prefix + "Boolean";
+        } else if (fieldtype.equals(StringUtils.LONG) || fieldtype.equals(StringUtils.DATE_TIME)) {
+            return prefix + "Long";
+        } else if (fieldtype.equals(StringUtils.DOUBLE)) {
+            return prefix + "Double";
+        } else {
+            return prefix + "Object";
+        }
+    }
+
+    public static String getJavaParcelMethodGenerator(String fieldType, String prefix) {
+        if (fieldType.equals(StringUtils.INT) || fieldType.equals(StringUtils.BOOLEAN)) {
+            return prefix + "Int";
+        } else if (fieldType.equals(StringUtils.LONG) || fieldType.equals(StringUtils.DATE_TIME)) {
+            return prefix + "Long";
+        } else if (fieldType.equals(StringUtils.DOUBLE)) {
+            return prefix + "Double";
+        } else {
+            return prefix + "String";
+        }
+    }
+
+
+    public static String getJavaTypeStringGetter(String fieldType, String prefix) {
+        if (fieldType.equals(StringUtils.INT) || fieldType.equals(StringUtils.BOOLEAN)) {
+            return prefix + "Int";
+        } else if (fieldType.equals(StringUtils.LONG) || fieldType.equals(StringUtils.DATE_TIME)) {
+            return prefix + "Long";
+        } else if (fieldType.equals(StringUtils.DOUBLE)) {
+            return prefix + "Double";
+        } else {
+            return prefix + "String";
+        }
+    }
 }

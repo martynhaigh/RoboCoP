@@ -184,7 +184,7 @@ public class ${tableName} implements Serializable, Parcelable {
     }
 
     public ContentValues getContentValues() {
-        if (mValues.size() == 0) {
+        if (mValues.size() != ${numberOfFields}) {
 #foreach ($field in $fields)
 #if($field && !$field.isCustom() && $field.getFieldType() != "boolean")
             mValues.put(${tableName}Table.${field.getConstantString()}, ${field.getPrivateVariableName()});
@@ -196,6 +196,7 @@ public class ${tableName} implements Serializable, Parcelable {
 
             // Foreign keys.
 #foreach( $relationship in $participatingRelationships )
+#set( $foreignKeyTitleCase = $relationship.getForeignKeyVariableAsTitleCase($table) )
 #set( $foreignKeyConstant = $relationship.getForeignKeyNameForTable($table) )
 #set( $foreignKey = $relationship.getForeignKeyPrivateVariableNameForTable($table) )
 #if( $foreignKeyTitleCase && $foreignKeyConstant)
@@ -209,11 +210,12 @@ public class ${tableName} implements Serializable, Parcelable {
 
 #foreach ($field in $fields)
 #if($field)
-    public void set${field.getNameAsTitleCase()}(final ${field.getJavaTypeString()} ${field.getFieldName()}) {
+    public ${tableName} set${field.getNameAsTitleCase()}(final ${field.getJavaTypeString()} ${field.getFieldName()}) {
         ${field.getPrivateVariableName()} = ${field.getFieldName()};
 #if(!$field.isCustom())
         mValues.put(${tableName}Table.${field.getConstantString()}, ${field.getFieldName()});
 #end
+        return this;
     }
 
     public ${field.getJavaTypeString()} get${field.getNameAsTitleCase()}() {
@@ -353,6 +355,11 @@ public class ${tableName} implements Serializable, Parcelable {
         return rowsAdded;
     }
 
+    public static void bulkDelete(final Context context, final List<? extends ${tableName}> items) {
+        for (${tableName} item : items) {
+            ${tableName}.delete(context, item);
+        }
+    }
 
     public static void bulkUpdate(final Context context, final List<? extends ${tableName}> items) {
         for (${tableName} item : items) {
@@ -388,7 +395,7 @@ public class ${tableName} implements Serializable, Parcelable {
     }
 
 
-    protected void writeObject(ObjectOutputStream out) throws IOException {
+    private void writeObject(ObjectOutputStream out) throws IOException {
 #foreach ($field in $fields)
 #if($field && !$field.isCustom())
         out.${field.getJavaSerializableWriter()}(${field.getPrivateVariableName()});
@@ -405,7 +412,7 @@ public class ${tableName} implements Serializable, Parcelable {
 #end
     }
 
-    protected void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 #foreach ($field in $fields)
 #if($field && !$field.isCustom())
         ${field.getPrivateVariableName()} = (${field.getJavaTypeLongString()}) in.${field.getJavaSerializableReader()}();

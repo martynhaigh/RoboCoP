@@ -50,11 +50,7 @@ public class ContentProviderRelationshipModel {
         //System.out.println(other.getRightTableName() + "==" + getRightTableName() + " = " + other.getRightTableName().equals(getRightTableName()));
         //System.out.println(other.getReferenceType() + "==" + getReferenceType() + " = " + other.getReferenceType().equals(getReferenceType()));
 
-
-        if (other.getLeftTableName().equals(getLeftTableName()) && other.getRightTableName().equals(getRightTableName())) {
-            return true;
-        }
-        return false;
+        return other.getLeftTableName().equals(getLeftTableName()) && other.getRightTableName().equals(getRightTableName());
     }
 
     public ContentProviderRelationshipModel(String referenceType, String customName, String leftTableName, String rightTableName) {

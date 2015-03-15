@@ -92,6 +92,7 @@ public class ContentProviderWriter {
                 tableContext.put("fields", table.getFields());
                 tableContext.put("serialVersionUID", table.getTableClassName().hashCode());
                 tableContext.put("primaryKey", table.getPrimaryKey());
+                tableContext.put("numberOfFields", table.getFields().size() + contentProviderModel.getRelationshipsForTable(table).size());
 
                 writeFile(engine, tableContext, "Table.vm", tablePath, "/" + table.getTableClassName() + "Table.java");
                 writeFile(engine, tableContext, "Model.vm", modelPath, "/" + table.getTableClassName() + ".java");
